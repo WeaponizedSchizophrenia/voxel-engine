@@ -1,15 +1,21 @@
 use winit::{
     application::ApplicationHandler,
     dpi::LogicalSize,
-    event::WindowEvent,
+    event::{StartCause, WindowEvent},
     event_loop::ActiveEventLoop,
     window::{Window, WindowAttributes, WindowId},
+};
+
+use crate::{
+    ecs::schedules::{Exit, Init, Render, Update},
+    world::World,
 };
 
 /// The main application object.
 #[derive(Default)]
 pub struct Application {
     main_window: Option<Window>,
+    world: World,
 }
 
 impl Application {
@@ -33,11 +39,15 @@ impl Application {
             }
 
             WindowEvent::RedrawRequested => {
+                self.world.run_schedule(Render);
+
                 main_window.request_redraw();
             }
 
             _ => {}
         }
+
+        self.world.run_schedule(Update);
     }
 }
 
@@ -67,5 +77,18 @@ impl ApplicationHandler for Application {
         {
             self.handle_main_window_event(event, event_loop);
         }
+    }
+
+    fn new_events(&mut self, event_loop: &ActiveEventLoop, cause: StartCause) {
+        let _ = event_loop;
+
+        if let StartCause::Init = cause {
+            self.world.run_schedule(Init);
+        }
+    }
+
+    fn exiting(&mut self, event_loop: &ActiveEventLoop) {
+        let _ = event_loop;
+        self.world.run_schedule(Exit);
     }
 }

@@ -6,6 +6,9 @@ use winit::{
 };
 
 mod application;
+mod ecs;
+mod utils;
+mod world;
 
 fn main() -> Result<(), EventLoopError> {
     match init_logging() {
