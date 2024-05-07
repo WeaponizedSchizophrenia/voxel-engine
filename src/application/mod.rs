@@ -12,7 +12,7 @@ use crate::{
     ecs::{
         components::{self, render_surface::RenderSurface},
         resources::{GpuInstance, RenderContext},
-        schedules::{Exit, Init, Render, Update},
+        schedules::{Exit, Init, Render, RequestRender, Update},
         systems,
     },
     utils::bevy::ScheduleExtensions as _,
@@ -24,6 +24,7 @@ pub struct Application {
 }
 
 impl Application {
+    /// Creates a new `Application` instance.
     pub async fn new() -> anyhow::Result<Self> {
         let mut world = World::default();
 
@@ -32,6 +33,8 @@ impl Application {
         world.add_schedule(Schedule::new(Render)
             .with_systems(systems::render_system));
         world.add_schedule(Schedule::new(Exit));
+        world.add_schedule(Schedule::new(RequestRender)
+            .with_systems(systems::rerender_request_system));
 
         let gpu_instance = GpuInstance::new().await?;
         let render_context = RenderContext::new(&gpu_instance).await?;
@@ -58,6 +61,9 @@ impl Application {
 
             WindowEvent::RedrawRequested => {
                 self.world.run_schedule(Render);
+
+                // Request a rerender.
+                self.world.run_schedule(RequestRender);
             }
 
             _ => {}

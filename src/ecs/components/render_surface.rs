@@ -1,29 +1,54 @@
 #![allow(dead_code)]
 
 use bevy_ecs::component::Component;
-use wgpu::{PresentMode, Surface, SurfaceConfiguration, SurfaceError, SurfaceTexture, TextureUsages};
+use thiserror::Error;
+use wgpu::{CreateSurfaceError, PresentMode, Surface, SurfaceConfiguration, SurfaceError, SurfaceTexture, TextureUsages};
 
-use crate::ecs::resources::{gpu_instance::GpuInstance, render_context::RenderContext};
+use crate::ecs::resources::{GpuInstance, RenderContext};
 
 use super::Window;
 
+/// A surface that can be rendererd to.
 #[derive(Component)]
 pub struct RenderSurface {
     surface: Surface<'static>,
     surface_config: SurfaceConfiguration,
 }
 
+/// An error that can occur when creating `RenderSurface`.
+#[derive(Error, Debug)]
+pub enum RenderSurfaceCreationError {
+    /// This error can occur when `Instance::create_surface` fails.
+    #[error(transparent)]
+    CreateSurfaceError(#[from] CreateSurfaceError),
+    /// This error can occure when the adapter does not support the created surface.
+    #[error("Adpater does not support surface")]
+    UnsuportedSurface,
+    /// This can happen when the surface capabilities do not contain any alpha modes.
+    #[error("Could not find any compatible alpha modes")]
+    NoAlphaModes,
+    /// This can happen when the surface capabilities do not contain any texture formats.
+    #[error("Could not find any compatible texture formats")]
+    NoFormats,
+}
+
 impl RenderSurface {
+    /// Creates a surface for the provided window.
+    /// 
+    /// ## Arguments
+    /// * `window` - The window the surface will be presented to.
+    /// * `instance` - The gpu instance.
+    /// * `context` - The render context.
     pub async fn render_to_window(
         window: &Window,
         instance: &GpuInstance,
         context: &RenderContext,
-    ) -> anyhow::Result<Self> {
+    ) -> Result<Self, RenderSurfaceCreationError> {
         let window = window.get_ptr();
         let surface = instance.create_surface(window.clone())?;
 
         if !instance.is_surface_supported(&surface) {
-            return Err(anyhow::anyhow!("Adpater does not support surface"));
+            return Err(RenderSurfaceCreationError::UnsuportedSurface);
         }
 
         let caps = surface.get_capabilities(instance.get_adapter());
@@ -38,12 +63,12 @@ impl RenderSurface {
             alpha_mode: *caps
                 .alpha_modes
                 .first()
-                .ok_or(anyhow::anyhow!("No alpha modes"))?,
+                .ok_or(RenderSurfaceCreationError::NoAlphaModes)?,
             format: caps
                 .formats
                 .into_iter()
                 .find(|f| f.is_srgb())
-                .ok_or(anyhow::anyhow!("No formats"))?,
+                .ok_or(RenderSurfaceCreationError::NoFormats)?,
             view_formats: vec![],
             width: window_size.width,
             height: window_size.height,
@@ -59,6 +84,7 @@ impl RenderSurface {
         })
     }
 
+    /// Resizes this surface to the give size.
     pub fn resize<V2: Into<(u32, u32)>>(&mut self, context: &RenderContext, new_size: V2) {
         (self.surface_config.width, self.surface_config.height) = new_size.into();
 
@@ -66,6 +92,7 @@ impl RenderSurface {
             .configure(&context.device, &self.surface_config);
     }
 
+    /// Returns the surface's current texture.
     pub fn get_texture(&self) -> Result<SurfaceTexture, SurfaceError> {
         self.surface.get_current_texture()
     }

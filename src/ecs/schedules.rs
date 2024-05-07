@@ -11,3 +11,6 @@ pub struct Render;
 
 #[derive(ScheduleLabel, Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Exit;
+
+#[derive(ScheduleLabel, Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct RequestRender;

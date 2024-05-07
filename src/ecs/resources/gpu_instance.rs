@@ -5,14 +5,17 @@ use wgpu::{
     PowerPreference, RequestAdapterOptions, Surface, SurfaceTarget,
 };
 
+/// `wgpu::Instance` and `wgpu::Adapter` wrapper.
 #[derive(Resource)]
 pub struct GpuInstance(Instance, Adapter);
 
+/// An error that can occur when creating `GpuInstance`.
 #[derive(Error, Clone, Copy, Debug, PartialEq, Eq)]
 #[error("Could not get the wgpu::Adapter")]
 pub struct AdapterRequestError;
 
 impl GpuInstance {
+    /// Creates a new `GpuInstance`.
     pub async fn new() -> Result<Self, AdapterRequestError> {
         let instance = Instance::new(InstanceDescriptor {
             backends: Backends::all(),
@@ -34,6 +37,9 @@ impl GpuInstance {
         Ok(Self(instance, adapter))
     }
 
+    /// Creates a new `wgpu::Surface`.
+    /// 
+    /// Note: This does not create the `RenderSurface` component, this just delegates the call to the `wgpu::Instance`.
     pub fn create_surface<'w>(
         &self,
         target: impl Into<SurfaceTarget<'w>>,
@@ -41,10 +47,12 @@ impl GpuInstance {
         self.0.create_surface(target)
     }
 
+    /// Checks if the provided `wgpu::Surface` is compatible with the adapter.
     pub fn is_surface_supported(&self, surface: &Surface<'_>) -> bool {
         self.1.is_surface_supported(surface)
     }
 
+    /// Returns a reference to the `wgpu::Adapter`.
     pub fn get_adapter(&self) -> &Adapter {
         &self.1
     }
