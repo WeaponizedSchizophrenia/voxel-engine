@@ -1,3 +1,8 @@
-pub mod window;
+mod window;
 pub use window::Window;
-pub mod render_surface;
+mod render_surface;
+pub use render_surface::RenderSurface;
+mod geometry;
+pub use geometry::Geometry;
+mod render_descriptor;
+pub use render_descriptor::RenderDescriptor;

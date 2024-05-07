@@ -6,27 +6,20 @@ use wgpu::{
 
 use crate::{
     ecs::{
-        components::render_surface::RenderSurface,
+        components::{Geometry, RenderDescriptor, RenderSurface},
         resources::{Config, PipelineServer, RenderContext},
     },
-    rendering::pipelines::{Pipeline, PipelineTrait as _},
+    rendering::pipelines::PipelineTrait as _,
 };
 
 pub fn render_system(
-    query: Query<&RenderSurface>,
+    surface_query: Query<&RenderSurface>,
+    render_query: Query<(&RenderDescriptor, &Geometry)>,
     pipeline_server: Res<PipelineServer>,
     context: Res<RenderContext>,
     config: Res<Config>,
 ) {
-    let voxel_pipeline = match pipeline_server.get_pipeline("voxel").map(|p| p.as_ref()) {
-        Some(Pipeline::Voxel(voxel)) => voxel,
-        _ => {
-            log::error!("Failed to get voxel pipeline");
-            return;
-        }
-    };
-
-    for render_surface in query.iter() {
+    for render_surface in surface_query.iter() {
         let output = render_surface.get_texture().unwrap();
         let output_view = output.texture.create_view(&Default::default());
 
@@ -58,9 +51,19 @@ pub fn render_system(
                 occlusion_query_set: None,
             });
 
-            voxel_pipeline.bind_to_render_pass(&mut render_pass);
+            for (desc, geometry) in render_query.iter() {
+                let pipeline = match pipeline_server.get_pipeline(desc.get_pipeline_name()) {
+                    Some(pipeline) => pipeline,
+                    None => {
+                        log::error!("Could not find pipeline {}", desc.get_pipeline_name());
+                        continue;
+                    }
+                };
 
-            render_pass.draw(0..3, 0..1);
+                pipeline.bind_to_render_pass(&mut render_pass);
+
+                geometry.render_to_render_pass(&mut render_pass);
+            }
         }
 
         context.queue.submit(Some(command_encoder.finish()));

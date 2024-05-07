@@ -1,7 +1,7 @@
 use bevy_ecs::system::{Res, ResMut};
 
 use crate::{
-    ecs::resources::{Config, PipelineServer, RenderContext},
+    ecs::resources::{PipelineServer, RenderContext},
     rendering::pipelines::{Pipeline, VoxelPipeline},
     utils::file_system,
 };
@@ -10,7 +10,6 @@ use crate::{
 pub fn init_pipeline_server_system(
     mut server: ResMut<PipelineServer>,
     render_context: Res<RenderContext>,
-    config: Res<Config>,
 ) {
     let shader = match file_system::read_wgsl_shader("voxel") {
         Ok(shader) => shader,
@@ -20,7 +19,7 @@ pub fn init_pipeline_server_system(
         }
     };
 
-    let pipeline = VoxelPipeline::new(&render_context.device, &shader, &config.triangle_color);
+    let pipeline = VoxelPipeline::new(&render_context.device, &shader);
 
     server.add_pipeline("voxel".to_owned(), Pipeline::Voxel(pipeline));
 }

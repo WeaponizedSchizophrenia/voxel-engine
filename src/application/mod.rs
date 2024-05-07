@@ -1,4 +1,7 @@
-use bevy_ecs::{schedule::{IntoSystemConfigs as _, Schedule}, world::World};
+use bevy_ecs::{
+    schedule::{IntoSystemConfigs as _, Schedule},
+    world::World,
+};
 use pollster::FutureExt;
 use winit::{
     application::ApplicationHandler,
@@ -10,11 +13,12 @@ use winit::{
 
 use crate::{
     ecs::{
-        components::{self, render_surface::RenderSurface},
+        components::{self, Geometry, RenderDescriptor, RenderSurface},
         resources::{GpuInstance, PipelineServer, RenderContext},
         schedules::{Exit, Init, Render, RequestRender, Update},
         systems,
     },
+    rendering::{index, vertex::Vertex},
     utils::bevy::ScheduleExtensions as _,
 };
 
@@ -31,7 +35,9 @@ impl Application {
         world.add_schedule(
             Schedule::new(Init)
                 .with_systems(systems::init_config_system)
-                .with_systems(systems::init_pipeline_server_system.after(systems::init_config_system))
+                .with_systems(
+                    systems::init_pipeline_server_system.after(systems::init_config_system),
+                ),
         );
         world.add_schedule(Schedule::new(Update));
         world.add_schedule(Schedule::new(Render).with_systems(systems::render_system));
@@ -42,6 +48,34 @@ impl Application {
 
         let gpu_instance = GpuInstance::new().await?;
         let render_context = RenderContext::new(&gpu_instance).await?;
+
+        // Spawn the hello quad.
+        world.spawn((
+            RenderDescriptor::new("voxel".to_owned()),
+            Geometry::new(
+                &render_context.device,
+                &[
+                    Vertex {
+                        position: [-0.5, -0.5, 0.0],
+                        color: [0.0, 1.0, 0.0],
+                    },
+                    Vertex {
+                        position: [0.5, -0.5, 0.0],
+                        color: [0.0, 0.0, 1.0],
+                    },
+                    Vertex {
+                        position: [0.5, 0.5, 0.0],
+                        color: [0.0, 1.0, 0.0],
+                    },
+                    Vertex {
+                        position: [-0.5, 0.5, 0.0],
+                        color: [1.0, 0.0, 0.0],
+                    },
+                ],
+                &[0 as index::Index, 2, 1, 0, 3, 2],
+                index::INDEX_FORMAT,
+            ),
+        ));
 
         world.insert_resource(gpu_instance);
         world.insert_resource(render_context);
