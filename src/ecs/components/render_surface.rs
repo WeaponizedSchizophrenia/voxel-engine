@@ -2,7 +2,10 @@
 
 use bevy_ecs::component::Component;
 use thiserror::Error;
-use wgpu::{CreateSurfaceError, PresentMode, Surface, SurfaceConfiguration, SurfaceError, SurfaceTexture, TextureUsages};
+use wgpu::{
+    CreateSurfaceError, PresentMode, Surface, SurfaceConfiguration, SurfaceError, SurfaceTexture,
+    TextureUsages,
+};
 
 use crate::ecs::resources::{GpuInstance, RenderContext};
 
@@ -34,7 +37,7 @@ pub enum RenderSurfaceCreationError {
 
 impl RenderSurface {
     /// Creates a surface for the provided window.
-    /// 
+    ///
     /// ## Arguments
     /// * `window` - The window the surface will be presented to.
     /// * `instance` - The gpu instance.

@@ -4,6 +4,7 @@ use winit::event_loop::{ControlFlow, EventLoop};
 
 mod application;
 mod ecs;
+mod rendering;
 mod utils;
 
 #[pollster::main]

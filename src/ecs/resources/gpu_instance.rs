@@ -38,7 +38,7 @@ impl GpuInstance {
     }
 
     /// Creates a new `wgpu::Surface`.
-    /// 
+    ///
     /// Note: This does not create the `RenderSurface` component, this just delegates the call to the `wgpu::Instance`.
     pub fn create_surface<'w>(
         &self,

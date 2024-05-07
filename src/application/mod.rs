@@ -11,7 +11,7 @@ use winit::{
 use crate::{
     ecs::{
         components::{self, render_surface::RenderSurface},
-        resources::{GpuInstance, RenderContext},
+        resources::{GpuInstance, PipelineServer, RenderContext},
         schedules::{Exit, Init, Render, RequestRender, Update},
         systems,
     },
@@ -28,19 +28,21 @@ impl Application {
     pub async fn new() -> anyhow::Result<Self> {
         let mut world = World::default();
 
-        world.add_schedule(Schedule::new(Init));
+        world.add_schedule(Schedule::new(Init).with_systems(systems::init_pipeline_server_system));
         world.add_schedule(Schedule::new(Update));
-        world.add_schedule(Schedule::new(Render)
-            .with_systems(systems::render_system));
+        world.add_schedule(Schedule::new(Render).with_systems(systems::render_system));
         world.add_schedule(Schedule::new(Exit));
-        world.add_schedule(Schedule::new(RequestRender)
-            .with_systems(systems::rerender_request_system));
+        world.add_schedule(
+            Schedule::new(RequestRender).with_systems(systems::rerender_request_system),
+        );
 
         let gpu_instance = GpuInstance::new().await?;
         let render_context = RenderContext::new(&gpu_instance).await?;
 
         world.insert_resource(gpu_instance);
         world.insert_resource(render_context);
+
+        world.insert_resource(PipelineServer::default());
 
         Ok(Self { world })
     }
@@ -88,17 +90,20 @@ impl ApplicationHandler for Application {
             match RenderSurface::render_to_window(
                 &window,
                 self.world.get_resource::<GpuInstance>().unwrap(),
-                self.world.get_resource::<RenderContext>().unwrap()
-            ).await {
+                self.world.get_resource::<RenderContext>().unwrap(),
+            )
+            .await
+            {
                 Ok(surface) => {
                     self.world.spawn((window, surface));
                     log::info!("Window and surface created");
-                },
+                }
                 Err(e) => {
                     log::error!("Failed to create render surface: {e}");
                 }
             };
-        }.block_on();
+        }
+        .block_on();
     }
 
     fn window_event(
