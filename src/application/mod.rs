@@ -27,9 +27,10 @@ impl Application {
     pub async fn new() -> anyhow::Result<Self> {
         let mut world = World::default();
 
-        world.add_schedule(Schedule::new(Init).with_systems(systems::test_system));
+        world.add_schedule(Schedule::new(Init));
         world.add_schedule(Schedule::new(Update));
-        world.add_schedule(Schedule::new(Render));
+        world.add_schedule(Schedule::new(Render)
+            .with_systems(systems::render_system));
         world.add_schedule(Schedule::new(Exit));
 
         let gpu_instance = GpuInstance::new().await?;

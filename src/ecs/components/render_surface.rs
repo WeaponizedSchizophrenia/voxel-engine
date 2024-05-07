@@ -1,19 +1,19 @@
 #![allow(dead_code)]
 
 use bevy_ecs::component::Component;
-use wgpu::{PresentMode, Surface, SurfaceConfiguration, TextureUsages};
+use wgpu::{PresentMode, Surface, SurfaceConfiguration, SurfaceError, SurfaceTexture, TextureUsages};
 
 use crate::ecs::resources::{gpu_instance::GpuInstance, render_context::RenderContext};
 
 use super::Window;
 
 #[derive(Component)]
-pub struct RenderSurface<'a> {
-    surface: Surface<'a>,
+pub struct RenderSurface {
+    surface: Surface<'static>,
     surface_config: SurfaceConfiguration,
 }
 
-impl<'a> RenderSurface<'a> {
+impl RenderSurface {
     pub async fn render_to_window(
         window: &Window,
         instance: &GpuInstance,
@@ -64,5 +64,9 @@ impl<'a> RenderSurface<'a> {
 
         self.surface
             .configure(&context.device, &self.surface_config);
+    }
+
+    pub fn get_texture(&self) -> Result<SurfaceTexture, SurfaceError> {
+        self.surface.get_current_texture()
     }
 }
