@@ -12,6 +12,12 @@ pub struct VoxelPipeline {
     pipeline: RenderPipeline,
 }
 
+impl super::PipelineTrait for VoxelPipeline {
+    fn bind_to_render_pass<'rp, 's: 'rp>(&'s self, render_pass: &mut RenderPass<'rp>) {
+        render_pass.set_pipeline(&self.pipeline);
+    }
+}
+
 impl VoxelPipeline {
     /// Creates a new `VoxelPipeline`.
     ///
@@ -71,10 +77,5 @@ impl VoxelPipeline {
         });
 
         Self { pipeline }
-    }
-
-    /// Binds this pipeline to the provided render pass.
-    pub fn bind_to_render_pass<'rp, 's: 'rp>(&'s self, render_pass: &mut RenderPass<'rp>) {
-        render_pass.set_pipeline(&self.pipeline);
     }
 }

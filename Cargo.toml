@@ -35,3 +35,4 @@ pollster = { version = "0.3.0", features = [ "macro" ] }
 
 # Utilities
 bytemuck = { version = "1.15.0", features = [ "derive" ] }
+enum_dispatch = "0.3.13"
