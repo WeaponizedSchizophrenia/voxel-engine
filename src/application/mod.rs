@@ -38,7 +38,8 @@ impl Application {
                 .with_systems(systems::init_config_system)
                 .with_systems(
                     systems::init_pipeline_server_system.after(systems::init_config_system),
-                ),
+                )
+                .with_systems(systems::init_camera_system.after(systems::init_pipeline_server_system)),
         );
         world.add_schedule(Schedule::new(Update).with_systems(systems::generate_chunk_data));
         world.add_schedule(Schedule::new(Render).with_systems(systems::render_system));

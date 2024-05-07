@@ -8,3 +8,5 @@ mod config_systems;
 pub use config_systems::{init_config_system, save_config_system};
 mod chunk_systems;
 pub use chunk_systems::generate_chunk_data;
+mod init_camera_system;
+pub use init_camera_system::init_camera_system;

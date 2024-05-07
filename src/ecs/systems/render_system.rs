@@ -7,7 +7,7 @@ use wgpu::{
 use crate::{
     ecs::{
         components::{Geometry, RenderDescriptor, RenderSurface},
-        resources::{Config, PipelineServer, RenderContext},
+        resources::{Camera, Config, PipelineServer, RenderContext},
     },
     rendering::pipelines::PipelineTrait as _,
 };
@@ -18,6 +18,7 @@ pub fn render_system(
     pipeline_server: Res<PipelineServer>,
     context: Res<RenderContext>,
     config: Res<Config>,
+    camera: Res<Camera>,
 ) {
     for render_surface in surface_query.iter() {
         let output = render_surface.get_texture().unwrap();
@@ -51,6 +52,7 @@ pub fn render_system(
                 occlusion_query_set: None,
             });
 
+            
             for (desc, geometry) in render_query.iter() {
                 let pipeline = match pipeline_server.get_pipeline(desc.get_pipeline_name()) {
                     Some(pipeline) => pipeline,
@@ -59,8 +61,9 @@ pub fn render_system(
                         continue;
                     }
                 };
-
+                
                 pipeline.bind_to_render_pass(&mut render_pass);
+                camera.bind_to_render_pass(&mut render_pass);
 
                 geometry.render_to_render_pass(&mut render_pass);
             }

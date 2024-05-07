@@ -1,15 +1,13 @@
 use wgpu::{
-    ColorTargetState, ColorWrites, Device, FragmentState, FrontFace, MultisampleState,
-    PipelineCompilationOptions, PolygonMode, PrimitiveState, PrimitiveTopology, RenderPass,
-    RenderPipeline, RenderPipelineDescriptor, ShaderModuleDescriptor, ShaderSource, TextureFormat,
-    VertexState,
+    BindGroupLayout, ColorTargetState, ColorWrites, Device, FragmentState, FrontFace, MultisampleState, PipelineCompilationOptions, PipelineLayoutDescriptor, PolygonMode, PrimitiveState, PrimitiveTopology, RenderPass, RenderPipeline, RenderPipelineDescriptor, ShaderModuleDescriptor, ShaderSource, TextureFormat, VertexState
 };
 
-use crate::rendering::vertex::Vertex;
+use crate::{ecs::resources::camera, rendering::vertex::Vertex};
 
 /// A pipeline for rendering voxels.
 pub struct VoxelPipeline {
     pipeline: RenderPipeline,
+    pub camera_bind_group_layout: BindGroupLayout,
 }
 
 impl super::PipelineTrait for VoxelPipeline {
@@ -32,9 +30,17 @@ impl VoxelPipeline {
             source: ShaderSource::Wgsl(src.into()),
         });
 
+        let camera_bind_group_layout = device.create_bind_group_layout(&camera::CAMERA_BIND_GROUP_LAYOUT_DESCRIPTOR);
+
+        let pipeline_layout = device.create_pipeline_layout(&PipelineLayoutDescriptor {
+            label: Some("pipeline_layout_voxel"),
+            bind_group_layouts: &[&camera_bind_group_layout],
+            push_constant_ranges: &[],
+        });
+
         let pipeline = device.create_render_pipeline(&RenderPipelineDescriptor {
             label: Some("pipeline_voxel"),
-            layout: None,
+            layout: Some(&pipeline_layout),
             vertex: VertexState {
                 module: &module,
                 entry_point: "voxel_vertex",
@@ -76,6 +82,6 @@ impl VoxelPipeline {
             multiview: None,
         });
 
-        Self { pipeline }
+        Self { pipeline, camera_bind_group_layout }
     }
 }
