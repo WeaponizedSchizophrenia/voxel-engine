@@ -6,3 +6,5 @@ mod pipeline_server;
 pub use pipeline_server::PipelineServer;
 mod config;
 pub use config::Config;
+mod generator;
+pub use generator::Generator;

@@ -3,6 +3,7 @@ use log4rs::config::Deserializers;
 use winit::event_loop::{ControlFlow, EventLoop};
 
 mod application;
+mod common;
 mod ecs;
 mod rendering;
 mod utils;

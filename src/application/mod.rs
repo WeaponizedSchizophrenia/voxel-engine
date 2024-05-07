@@ -2,6 +2,7 @@ use bevy_ecs::{
     schedule::{IntoSystemConfigs as _, Schedule},
     world::World,
 };
+use nalgebra::vector;
 use pollster::FutureExt;
 use winit::{
     application::ApplicationHandler,
@@ -13,8 +14,8 @@ use winit::{
 
 use crate::{
     ecs::{
-        components::{self, Geometry, RenderDescriptor, RenderSurface},
-        resources::{GpuInstance, PipelineServer, RenderContext},
+        components::{self, Chunk, Geometry, RenderDescriptor, RenderSurface},
+        resources::{Generator, GpuInstance, PipelineServer, RenderContext},
         schedules::{Exit, Init, Render, RequestRender, Update},
         systems,
     },
@@ -39,7 +40,7 @@ impl Application {
                     systems::init_pipeline_server_system.after(systems::init_config_system),
                 ),
         );
-        world.add_schedule(Schedule::new(Update));
+        world.add_schedule(Schedule::new(Update).with_systems(systems::generate_chunk_data));
         world.add_schedule(Schedule::new(Render).with_systems(systems::render_system));
         world.add_schedule(Schedule::new(Exit).with_systems(systems::save_config_system));
         world.add_schedule(
@@ -81,6 +82,14 @@ impl Application {
         world.insert_resource(render_context);
 
         world.insert_resource(PipelineServer::default());
+
+        world.insert_resource(Generator::new());
+
+        for x in -4..5 {
+            for z in -4..5 {
+                world.spawn(Chunk::new(vector![x, z]));
+            }
+        }
 
         Ok(Self { world })
     }
