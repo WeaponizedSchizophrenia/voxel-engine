@@ -31,7 +31,7 @@ thiserror = "1.0.59"
 
 # Parallelism and async
 rayon = "1.10.0"
-pollster = "0.3.0"
+pollster = { version = "0.3.0", features = [ "macro" ] }
 
 # Utilities
 bytemuck = { version = "1.15.0", features = [ "derive" ] }

@@ -1,16 +1,13 @@
 use application::Application;
 use log4rs::config::Deserializers;
-use winit::{
-    error::EventLoopError,
-    event_loop::{ControlFlow, EventLoop},
-};
+use winit::event_loop::{ControlFlow, EventLoop};
 
 mod application;
 mod ecs;
 mod utils;
-mod world;
 
-fn main() -> Result<(), EventLoopError> {
+#[pollster::main]
+async fn main() -> anyhow::Result<()> {
     match init_logging() {
         Ok(_) => log::info!("Logging intialized"),
         Err(e) => {
@@ -22,8 +19,10 @@ fn main() -> Result<(), EventLoopError> {
     let event_loop = EventLoop::new()?;
     event_loop.set_control_flow(ControlFlow::Poll);
 
-    let mut application = Application::default();
-    event_loop.run_app(&mut application)
+    let mut app = Application::new().await?;
+    event_loop.run_app(&mut app)?;
+
+    Ok(())
 }
 
 fn init_logging() -> Result<(), anyhow::Error> {

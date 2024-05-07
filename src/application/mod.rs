@@ -1,24 +1,46 @@
+use bevy_ecs::{schedule::Schedule, world::World};
+use pollster::FutureExt;
 use winit::{
     application::ApplicationHandler,
     dpi::LogicalSize,
     event::{StartCause, WindowEvent},
     event_loop::ActiveEventLoop,
-    window::{Window, WindowAttributes, WindowId},
+    window::{WindowAttributes, WindowId},
 };
 
 use crate::{
-    ecs::schedules::{Exit, Init, Render, Update},
-    world::World,
+    ecs::{
+        components::{self, render_surface::RenderSurface},
+        resources::{GpuInstance, RenderContext},
+        schedules::{Exit, Init, Render, Update},
+        systems,
+    },
+    utils::bevy::ScheduleExtensions as _,
 };
 
 /// The main application object.
-#[derive(Default)]
 pub struct Application {
-    main_window: Option<Window>,
     world: World,
 }
 
 impl Application {
+    pub async fn new() -> anyhow::Result<Self> {
+        let mut world = World::default();
+
+        world.add_schedule(Schedule::new(Init).with_systems(systems::test_system));
+        world.add_schedule(Schedule::new(Update));
+        world.add_schedule(Schedule::new(Render));
+        world.add_schedule(Schedule::new(Exit));
+
+        let gpu_instance = GpuInstance::new().await?;
+        let render_context = RenderContext::new(&gpu_instance).await?;
+
+        world.insert_resource(gpu_instance);
+        world.insert_resource(render_context);
+
+        Ok(Self { world })
+    }
+
     /// Returns the attributes for the main window.
     fn get_main_window_attributes() -> WindowAttributes {
         WindowAttributes::default()
@@ -27,12 +49,7 @@ impl Application {
     }
 
     /// Handles the events for the main window.
-    ///
-    /// Note: This function assumes that the main window is Some.
     fn handle_main_window_event(&mut self, event: WindowEvent, event_loop: &ActiveEventLoop) {
-        // If this function is called that means the main window is definetly Some.
-        let main_window = self.main_window.as_ref().unwrap();
-
         match event {
             WindowEvent::CloseRequested => {
                 event_loop.exit();
@@ -40,8 +57,6 @@ impl Application {
 
             WindowEvent::RedrawRequested => {
                 self.world.run_schedule(Render);
-
-                main_window.request_redraw();
             }
 
             _ => {}
@@ -61,7 +76,22 @@ impl ApplicationHandler for Application {
             }
         };
 
-        self.main_window = Some(window);
+        async {
+            let window = components::Window::new(window);
+            match RenderSurface::render_to_window(
+                &window,
+                self.world.get_resource::<GpuInstance>().unwrap(),
+                self.world.get_resource::<RenderContext>().unwrap()
+            ).await {
+                Ok(surface) => {
+                    self.world.spawn((window, surface));
+                    log::info!("Window and surface created");
+                },
+                Err(e) => {
+                    log::error!("Failed to create render surface: {e}");
+                }
+            };
+        }.block_on();
     }
 
     fn window_event(
@@ -70,13 +100,8 @@ impl ApplicationHandler for Application {
         window_id: WindowId,
         event: WindowEvent,
     ) {
-        if self
-            .main_window
-            .as_ref()
-            .map_or(false, |w| w.id() == window_id)
-        {
-            self.handle_main_window_event(event, event_loop);
-        }
+        let _ = window_id;
+        self.handle_main_window_event(event, event_loop);
     }
 
     fn new_events(&mut self, event_loop: &ActiveEventLoop, cause: StartCause) {
