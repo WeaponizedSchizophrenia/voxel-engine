@@ -22,6 +22,7 @@ pub fn init_config_system(mut commands: Commands) {
     commands.insert_resource(config);
 }
 
+/// Saves the `Config` resource.
 pub fn save_config_system(config: Res<Config>) {
     match serde_yml::to_string(config.as_ref()) {
         Ok(str) => {

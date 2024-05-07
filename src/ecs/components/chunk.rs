@@ -5,6 +5,7 @@ use crate::common::Voxel;
 
 pub use crate::common::chunk::CHUNK_LENGTH;
 
+/// Contains the data for a single chunk.
 #[derive(Component)]
 pub struct Chunk {
     voxels: Vec<Option<Voxel>>,
@@ -12,6 +13,7 @@ pub struct Chunk {
 }
 
 impl Chunk {
+    /// Creates a new chunk with the specified index.
     pub fn new<V2: Into<Vector2<i32>>>(index: V2) -> Self {
         Self {
             voxels: vec![None; CHUNK_LENGTH * CHUNK_LENGTH * CHUNK_LENGTH],
@@ -22,7 +24,7 @@ impl Chunk {
     /// Samples a reference to a voxel at the specified position.
     ///
     /// ## Returns
-    /// The outter option indicates if the position is inside the chunk.
+    /// The outter option indicates whether the index is out of bounds or not.
     /// The inner option indicates if the voxel is present or not.
     pub fn sample<V3: Into<(usize, usize, usize)>>(&self, position: V3) -> Option<&Option<Voxel>> {
         let position = position.into();
@@ -33,7 +35,7 @@ impl Chunk {
     /// Samples a mutable reference to a voxel at the specified position.
     ///
     /// ## Returns
-    /// The outter option indicates if the position is inside the chunk.
+    /// The outter option indicates whether the index is out of bounds or not.
     /// The inner option indicates if the voxel is present or not.
     pub fn sample_mut<V3: Into<(usize, usize, usize)>>(
         &mut self,
