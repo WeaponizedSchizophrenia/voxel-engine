@@ -4,3 +4,5 @@ mod render_context;
 pub use render_context::RenderContext;
 mod pipeline_server;
 pub use pipeline_server::PipelineServer;
+mod config;
+pub use config::Config;

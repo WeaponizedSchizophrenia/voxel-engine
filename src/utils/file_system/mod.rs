@@ -1,12 +1,24 @@
 pub mod read;
+pub mod write;
 
 use std::{io, path::PathBuf};
 
 /// The relative path to the assets directory.
-const ASSETS_DIR: &str = "./assets";
+pub const ASSETS_DIR: &str = "./assets";
 /// Returns a `PathBuf` to the assets directory.
 pub fn get_asset_dir() -> PathBuf {
     PathBuf::from(ASSETS_DIR)
+}
+pub const CONFIG_PATH: &str = "./config/config.yml";
+
+/// Reads the config and returns the result.
+pub fn read_config() -> io::Result<String> {
+    read::read_text(CONFIG_PATH)
+}
+
+/// Writes the serialized config and returns the result.
+pub fn write_config(config: &str) -> io::Result<()> {
+    write::write_text(CONFIG_PATH, config)
 }
 
 /// Reads the shader with the given name.

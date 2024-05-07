@@ -24,8 +24,14 @@ impl VoxelPipeline {
     /// ## Parameters
     /// * `device` - The `wgpu::Device` to use for compiling.
     /// * `src` - The shader source code.
-    pub fn new(device: &Device, src: &str) -> Self {
-        let constants = HashMap::default();
+    pub fn new(device: &Device, src: &str, color: &(f32, f32, f32)) -> Self {
+        let constants = {
+            let mut map = HashMap::new();
+            map.insert("colorR".to_owned(), color.0 as f64);
+            map.insert("colorG".to_owned(), color.1 as f64);
+            map.insert("colorB".to_owned(), color.2 as f64);
+            map
+        };
 
         let module = device.create_shader_module(ShaderModuleDescriptor {
             label: Some("shader_module_voxel"),

@@ -1,6 +1,6 @@
 struct VertexInput {
     @builtin(vertex_index) index: u32,
-}
+};
 
 struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
@@ -17,15 +17,20 @@ fn voxel_vertex(
     return out;
 }
 
+override colorR: f32 = 0.1;
+override colorG: f32 = 0.1;
+override colorB: f32 = 0.1;
+
+
 struct FragmentOutput {
     @location(0) color: vec4<f32>,
-}
+};
 
 @fragment
 fn voxel_fragment(in: VertexOutput) -> FragmentOutput {
     var out: FragmentOutput;
 
-    out.color = vec4<f32>(0.1);
+    out.color = vec4<f32>(colorR, colorG, colorB, 1.0);
 
     return out;
 }

@@ -7,15 +7,16 @@ use wgpu::{
 use crate::{
     ecs::{
         components::render_surface::RenderSurface,
-        resources::{PipelineServer, RenderContext},
+        resources::{Config, PipelineServer, RenderContext},
     },
-    rendering::pipelines::Pipeline,
+    rendering::pipelines::{Pipeline, PipelineTrait as _},
 };
 
 pub fn render_system(
     query: Query<&RenderSurface>,
     pipeline_server: Res<PipelineServer>,
     context: Res<RenderContext>,
+    config: Res<Config>,
 ) {
     let voxel_pipeline = match pipeline_server.get_pipeline("voxel").map(|p| p.as_ref()) {
         Some(Pipeline::Voxel(voxel)) => voxel,
@@ -43,7 +44,12 @@ pub fn render_system(
                     view: &output_view,
                     resolve_target: None,
                     ops: Operations {
-                        load: LoadOp::Clear(Color::WHITE),
+                        load: LoadOp::Clear(Color {
+                            r: config.clearing_color.0 as f64,
+                            g: config.clearing_color.1 as f64,
+                            b: config.clearing_color.2 as f64,
+                            a: config.clearing_color.3 as f64,
+                        }),
                         store: StoreOp::Store,
                     },
                 })],

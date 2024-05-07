@@ -1,4 +1,4 @@
-use bevy_ecs::{schedule::Schedule, world::World};
+use bevy_ecs::{schedule::{IntoSystemConfigs as _, Schedule}, world::World};
 use pollster::FutureExt;
 use winit::{
     application::ApplicationHandler,
@@ -28,10 +28,14 @@ impl Application {
     pub async fn new() -> anyhow::Result<Self> {
         let mut world = World::default();
 
-        world.add_schedule(Schedule::new(Init).with_systems(systems::init_pipeline_server_system));
+        world.add_schedule(
+            Schedule::new(Init)
+                .with_systems(systems::init_config_system)
+                .with_systems(systems::init_pipeline_server_system.after(systems::init_config_system))
+        );
         world.add_schedule(Schedule::new(Update));
         world.add_schedule(Schedule::new(Render).with_systems(systems::render_system));
-        world.add_schedule(Schedule::new(Exit));
+        world.add_schedule(Schedule::new(Exit).with_systems(systems::save_config_system));
         world.add_schedule(
             Schedule::new(RequestRender).with_systems(systems::rerender_request_system),
         );
