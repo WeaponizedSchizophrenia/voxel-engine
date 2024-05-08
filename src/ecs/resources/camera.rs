@@ -1,9 +1,15 @@
 use bevy_ecs::system::Resource;
 use bytemuck::{Pod, Zeroable};
-use wgpu::{util::{BufferInitDescriptor, DeviceExt}, BindGroup, BindGroupDescriptor, BindGroupEntry, BindGroupLayout, BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingResource, BindingType, Buffer, BufferBindingType, BufferUsages, Device, Queue, RenderPass, ShaderStages};
+use wgpu::{
+    util::{BufferInitDescriptor, DeviceExt},
+    BindGroup, BindGroupDescriptor, BindGroupEntry, BindGroupLayout, BindGroupLayoutDescriptor,
+    BindGroupLayoutEntry, BindingResource, BindingType, Buffer, BufferBindingType, BufferUsages,
+    Device, Queue, RenderPass, ShaderStages,
+};
 
 #[derive(Resource)]
 pub struct Camera {
+    #[allow(unused)]
     uniform_buffer: Buffer,
     bind_group: BindGroup,
 }
@@ -19,12 +25,10 @@ impl Camera {
         let bind_group = device.create_bind_group(&BindGroupDescriptor {
             label: Some("bind_group_uniform_camera"),
             layout,
-            entries: &[
-                BindGroupEntry {
-                    binding: 0,
-                    resource: BindingResource::Buffer(uniform_buffer.as_entire_buffer_binding()),
-                }
-            ],
+            entries: &[BindGroupEntry {
+                binding: 0,
+                resource: BindingResource::Buffer(uniform_buffer.as_entire_buffer_binding()),
+            }],
         });
 
         Self {
@@ -33,8 +37,13 @@ impl Camera {
         }
     }
 
+    #[allow(unused)]
     pub fn update_camera(&self, queue: &Queue, camera_uniform: CameraUniform) {
-        queue.write_buffer(&self.uniform_buffer, 0, bytemuck::cast_slice(&[camera_uniform]));
+        queue.write_buffer(
+            &self.uniform_buffer,
+            0,
+            bytemuck::cast_slice(&[camera_uniform]),
+        );
     }
 
     pub fn bind_to_render_pass<'rp, 's: 'rp>(&'s self, render_pass: &mut RenderPass<'rp>) {
@@ -49,10 +58,10 @@ pub struct CameraUniform {
     pub position: [f32; 4],
 }
 
-pub const CAMERA_BIND_GROUP_LAYOUT_DESCRIPTOR: BindGroupLayoutDescriptor = BindGroupLayoutDescriptor {
-    label: Some("bind_group_layout_uniform_camera"),
-    entries: &[
-        BindGroupLayoutEntry {
+pub const CAMERA_BIND_GROUP_LAYOUT_DESCRIPTOR: BindGroupLayoutDescriptor =
+    BindGroupLayoutDescriptor {
+        label: Some("bind_group_layout_uniform_camera"),
+        entries: &[BindGroupLayoutEntry {
             binding: 0,
             visibility: ShaderStages::VERTEX_FRAGMENT,
             ty: BindingType::Buffer {
@@ -61,6 +70,5 @@ pub const CAMERA_BIND_GROUP_LAYOUT_DESCRIPTOR: BindGroupLayoutDescriptor = BindG
                 min_binding_size: None,
             },
             count: None,
-        }
-    ],
-};
+        }],
+    };

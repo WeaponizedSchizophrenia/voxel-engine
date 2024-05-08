@@ -2,14 +2,11 @@
 
 use std::sync::Arc;
 
-use bevy_ecs::component::Component;
+use bevy_ecs::system::Resource;
 use winit::window::Window as WinitWindow;
 
-#[derive(Component)]
-pub struct MainWindow;
-
-/// A window component.
-#[derive(Component)]
+/// A window resource.
+#[derive(Resource)]
 pub struct Window(Arc<WinitWindow>);
 
 impl From<WinitWindow> for Window {
@@ -33,7 +30,7 @@ impl Window {
     pub fn request_rerender(&self) {
         self.0.request_redraw();
     }
-    
+
     /// Gets the aspect ratio of the window.
     pub fn get_aspect_ratio(&self) -> f32 {
         let size = self.0.inner_size();

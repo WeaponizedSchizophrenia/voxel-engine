@@ -9,6 +9,7 @@ pub use crate::common::chunk::CHUNK_LENGTH;
 #[derive(Component)]
 pub struct Chunk {
     voxels: Vec<Option<Voxel>>,
+    #[allow(unused)]
     index: Vector2<i32>,
 }
 
@@ -26,6 +27,7 @@ impl Chunk {
     /// ## Returns
     /// The outter option indicates whether the index is out of bounds or not.
     /// The inner option indicates if the voxel is present or not.
+    #[allow(unused)]
     pub fn sample<V3: Into<(usize, usize, usize)>>(&self, position: V3) -> Option<&Option<Voxel>> {
         let position = position.into();
         self.voxels
@@ -47,6 +49,7 @@ impl Chunk {
         )
     }
 
+    #[allow(unused)]
     pub fn get_index(&self) -> Vector2<i32> {
         self.index
     }

@@ -1,19 +1,17 @@
 #![allow(dead_code)]
 
-use bevy_ecs::component::Component;
+use bevy_ecs::system::Resource;
 use thiserror::Error;
 use wgpu::{
     CreateSurfaceError, PresentMode, Surface, SurfaceConfiguration, SurfaceError, SurfaceTexture,
     TextureUsages,
 };
 
-use crate::ecs::resources::{GpuInstance, RenderContext};
-
-use super::Window;
+use crate::ecs::resources::{GpuInstance, RenderContext, Window};
 
 /// A surface that can be rendererd to.
-#[derive(Component)]
-pub struct RenderSurface {
+#[derive(Resource)]
+pub struct WindowRenderSurface {
     surface: Surface<'static>,
     surface_config: SurfaceConfiguration,
 }
@@ -35,14 +33,14 @@ pub enum RenderSurfaceCreationError {
     NoFormats,
 }
 
-impl RenderSurface {
+impl WindowRenderSurface {
     /// Creates a surface for the provided window.
     ///
     /// ## Arguments
     /// * `window` - The window the surface will be presented to.
     /// * `instance` - The gpu instance.
     /// * `context` - The render context.
-    pub async fn render_to_window(
+    pub fn render_to_window(
         window: &Window,
         instance: &GpuInstance,
         context: &RenderContext,

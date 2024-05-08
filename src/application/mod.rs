@@ -1,4 +1,5 @@
 use bevy_ecs::{
+    event::Events,
     schedule::{IntoSystemConfigs as _, Schedule},
     world::World,
 };
@@ -14,9 +15,12 @@ use winit::{
 
 use crate::{
     ecs::{
-        components::{self, Chunk, Geometry, RenderDescriptor, RenderSurface},
-        resources::{Generator, GpuInstance, PipelineServer, RenderContext},
-        schedules::{Exit, Init, Render, RequestRender, Update},
+        components::{Chunk, Geometry, RenderDescriptor},
+        events::{WindowRenderRequested, WindowResized},
+        resources::{
+            self, Generator, GpuInstance, PipelineServer, RenderContext, WindowRenderSurface,
+        },
+        schedules::{Exit, Init, Render, SentWindowEvent, Update, WindowInit},
         systems,
     },
     rendering::{index, vertex::Vertex},
@@ -33,19 +37,20 @@ impl Application {
     pub async fn new() -> anyhow::Result<Self> {
         let mut world = World::default();
 
-        world.add_schedule(
-            Schedule::new(Init)
-                .with_systems(systems::init_config_system)
-                .with_systems(
-                    systems::init_pipeline_server_system.after(systems::init_config_system),
-                )
-                .with_systems(systems::init_camera_system.after(systems::init_pipeline_server_system)),
-        );
+        world.add_schedule(Schedule::new(Init).with_systems((
+            systems::init_config_system,
+            systems::init_pipeline_server_system.after(systems::init_config_system),
+        )));
+        world.add_schedule(Schedule::new(WindowInit).with_systems(systems::init_camera_system));
         world.add_schedule(Schedule::new(Update).with_systems(systems::generate_chunk_data));
-        world.add_schedule(Schedule::new(Render).with_systems(systems::render_system));
+        world.add_schedule(Schedule::new(Render).with_systems((
+            systems::render_system,
+            systems::update_camera_system.before(systems::render_system),
+        )));
         world.add_schedule(Schedule::new(Exit).with_systems(systems::save_config_system));
         world.add_schedule(
-            Schedule::new(RequestRender).with_systems(systems::rerender_request_system),
+            Schedule::new(SentWindowEvent)
+                .with_systems((systems::rerender_request_system, systems::resized_system)),
         );
 
         let gpu_instance = GpuInstance::new().await?;
@@ -85,6 +90,8 @@ impl Application {
         world.insert_resource(PipelineServer::default());
 
         world.insert_resource(Generator::new());
+        world.insert_resource(Events::<WindowResized>::default());
+        world.insert_resource(Events::<WindowRenderRequested>::default());
 
         for x in -4..5 {
             for z in -4..5 {
@@ -109,11 +116,17 @@ impl Application {
                 event_loop.exit();
             }
 
+            WindowEvent::Resized(new_size) => {
+                dbg!(self.world.send_event(WindowResized::from(new_size)));
+                self.world.run_schedule(SentWindowEvent);
+            }
+
             WindowEvent::RedrawRequested => {
                 self.world.run_schedule(Render);
 
-                // Request a rerender.
-                self.world.run_schedule(RequestRender);
+                // After rendering request another render.
+                dbg!(self.world.send_event(WindowRenderRequested));
+                self.world.run_schedule(SentWindowEvent);
             }
 
             _ => {}
@@ -134,17 +147,17 @@ impl ApplicationHandler for Application {
         };
 
         async {
-            let window = components::Window::new(window);
-            match RenderSurface::render_to_window(
+            let window = resources::Window::new(window);
+            match WindowRenderSurface::render_to_window(
                 &window,
                 self.world.get_resource::<GpuInstance>().unwrap(),
                 self.world.get_resource::<RenderContext>().unwrap(),
-            )
-            .await
-            {
+            ) {
                 Ok(surface) => {
-                    self.world.spawn((window, surface));
+                    self.world.insert_resource(window);
+                    self.world.insert_resource(surface);
                     log::info!("Window and surface created");
+                    self.world.run_schedule(WindowInit);
                 }
                 Err(e) => {
                     log::error!("Failed to create render surface: {e}");

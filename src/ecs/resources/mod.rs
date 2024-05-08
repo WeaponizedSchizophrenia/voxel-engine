@@ -10,3 +10,7 @@ mod generator;
 pub use generator::Generator;
 pub mod camera;
 pub use camera::Camera;
+mod window;
+pub use window::Window;
+mod render_surface;
+pub use render_surface::WindowRenderSurface;
