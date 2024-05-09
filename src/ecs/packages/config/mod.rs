@@ -6,6 +6,7 @@ use crate::{ecs::schedules::Exit, utils::file_system};
 
 use super::Package;
 
+/// Package for the global config.
 pub struct ConfigPackage;
 
 impl Package for ConfigPackage {

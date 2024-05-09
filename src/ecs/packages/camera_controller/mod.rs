@@ -20,6 +20,7 @@ use super::{window_surface::Window, Package};
 
 mod component;
 
+/// Package for the camera controller.
 pub struct CameraControllerPackage;
 
 impl Package for CameraControllerPackage {
@@ -115,7 +116,7 @@ pub fn update_camera_system(
 ) {
     if let Some(camera) = camera {
         if let Ok(controller) = query.get_single() {
-            camera.update_camera(&render_context.queue, controller.get_uniform());
+            camera.update_camera(&render_context.queue, controller.construct_uniform());
         }
     }
 }

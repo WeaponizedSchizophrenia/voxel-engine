@@ -12,6 +12,7 @@ use crate::ecs::{
 
 use super::Package;
 
+/// Package for initializing a window and it's surface.
 pub struct WindowSurfacePackage {
     /// Even though this is a `Option`, it is always `Some`,
     /// because creating this struct from outside this module is only available with `WindowSurfacePackage::new()`.
@@ -19,6 +20,7 @@ pub struct WindowSurfacePackage {
 }
 
 impl WindowSurfacePackage {
+    /// Creates a new `WindowSurfacePackage` with the provided `winit_window`.
     pub fn new(winit_window: winit::window::Window) -> Self {
         Self {
             winit_window: Some(winit_window),

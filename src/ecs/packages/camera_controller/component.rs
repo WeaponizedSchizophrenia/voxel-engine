@@ -3,9 +3,11 @@ use nalgebra::{vector, Matrix4, Perspective3, Point3, Vector3};
 
 use crate::ecs::resources::camera::CameraUniform;
 
+/// A tag for the current camera controller.
 #[derive(Component)]
 pub struct CurrentCameraController;
 
+/// A camera controller that controls the camera.
 #[derive(Component)]
 pub struct CameraController {
     pub speed: f32,
@@ -32,7 +34,8 @@ impl Default for CameraController {
 }
 
 impl CameraController {
-    pub fn get_uniform(&self) -> CameraUniform {
+    /// Constructs a `CameraUniform` from this camera controller.
+    pub fn construct_uniform(&self) -> CameraUniform {
         let (yaw_sin, yaw_cos) = self.yaw.sin_cos();
         let (pitch_sin, pitch_cos) = self.pitch.sin_cos();
         let direction = vector![yaw_cos * pitch_cos, pitch_sin, yaw_sin * pitch_cos].normalize();

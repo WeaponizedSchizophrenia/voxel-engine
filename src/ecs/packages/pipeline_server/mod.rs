@@ -9,6 +9,7 @@ use crate::{
 
 use super::Package;
 
+/// Package for the pipeline server.
 pub struct PipelineServerPackage;
 
 impl Package for PipelineServerPackage {
