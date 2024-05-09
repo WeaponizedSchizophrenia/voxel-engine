@@ -20,7 +20,7 @@ pub struct CameraController {
 impl Default for CameraController {
     fn default() -> Self {
         Self {
-            speed: 1.0,
+            speed: 0.1,
             sensitivity: 1.0,
             position: Default::default(),
             aspect_ratio: 16.0 / 9.0,

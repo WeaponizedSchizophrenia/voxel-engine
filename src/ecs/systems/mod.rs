@@ -1,7 +1,7 @@
 mod render_system;
 pub use render_system::render_system;
 mod window_event_readers;
-pub use window_event_readers::{rerender_request_system, resized_system};
+pub use window_event_readers::{keyboard_input_system, rerender_request_system, resized_system};
 mod init_pipeline_server_system;
 pub use init_pipeline_server_system::init_pipeline_server_system;
 mod config_systems;

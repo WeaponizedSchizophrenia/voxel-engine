@@ -16,7 +16,7 @@ use winit::{
 use crate::{
     ecs::{
         components::{Chunk, Geometry, RenderDescriptor},
-        events::{WindowRenderRequested, WindowResized},
+        events::{window_events::KeyboardInput, WindowRenderRequested, WindowResized},
         resources::{
             self, Generator, GpuInstance, PipelineServer, RenderContext, WindowRenderSurface,
         },
@@ -48,10 +48,11 @@ impl Application {
             systems::update_camera_system.before(systems::render_system),
         )));
         world.add_schedule(Schedule::new(Exit).with_systems(systems::save_config_system));
-        world.add_schedule(
-            Schedule::new(SentWindowEvent)
-                .with_systems((systems::rerender_request_system, systems::resized_system)),
-        );
+        world.add_schedule(Schedule::new(SentWindowEvent).with_systems((
+            systems::rerender_request_system,
+            systems::resized_system,
+            systems::keyboard_input_system,
+        )));
 
         let gpu_instance = GpuInstance::new().await?;
         let render_context = RenderContext::new(&gpu_instance).await?;
@@ -92,6 +93,7 @@ impl Application {
         world.insert_resource(Generator::new());
         world.insert_resource(Events::<WindowResized>::default());
         world.insert_resource(Events::<WindowRenderRequested>::default());
+        world.insert_resource(Events::<KeyboardInput>::default());
 
         for x in -4..5 {
             for z in -4..5 {
@@ -117,7 +119,7 @@ impl Application {
             }
 
             WindowEvent::Resized(new_size) => {
-                dbg!(self.world.send_event(WindowResized::from(new_size)));
+                self.world.send_event(WindowResized::from(new_size));
                 self.world.run_schedule(SentWindowEvent);
             }
 
@@ -125,7 +127,14 @@ impl Application {
                 self.world.run_schedule(Render);
 
                 // After rendering request another render.
-                dbg!(self.world.send_event(WindowRenderRequested));
+                self.world.send_event(WindowRenderRequested);
+                self.world.run_schedule(SentWindowEvent);
+            }
+
+            WindowEvent::KeyboardInput {
+                event: key_event, ..
+            } => {
+                self.world.send_event(KeyboardInput::from(key_event));
                 self.world.run_schedule(SentWindowEvent);
             }
 
