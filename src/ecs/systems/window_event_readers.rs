@@ -1,10 +1,9 @@
 use bevy_ecs::{
     event::EventReader,
-    system::{Query, Res, ResMut},
+    system::{Res, ResMut},
 };
 
 use crate::ecs::{
-    components::CameraController,
     events::{window_events::KeyboardInput, WindowRenderRequested, WindowResized},
     resources::{RenderContext, Window, WindowRenderSurface},
 };
@@ -24,19 +23,18 @@ pub fn rerender_request_system(
 pub fn resized_system(
     mut events: EventReader<WindowResized>,
     surface: Option<ResMut<WindowRenderSurface>>,
-    mut camera_controllers: Query<&mut CameraController>,
     render_context: Res<RenderContext>,
 ) {
     if let Some(mut surface) = surface {
         for event in events.read() {
             surface.resize(&render_context, event.as_tuple());
-            for mut camera in camera_controllers.iter_mut() {
-                camera.aspect_ratio = event.new_width as f32 / event.new_height as f32;
-            }
         }
+    } else {
+        log::warn!("No surface to resize.");
     }
 }
 
 pub fn keyboard_input_system(mut events: EventReader<KeyboardInput>) {
-    for _event in events.read() {}
+    let _ = &mut events;
+    // for _event in events.read() {}
 }

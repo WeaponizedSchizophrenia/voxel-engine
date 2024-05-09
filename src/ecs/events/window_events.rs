@@ -1,4 +1,5 @@
 use bevy_ecs::event::Event;
+use nalgebra::{vector, Vector2};
 use winit::{
     dpi::PhysicalSize,
     event::{ElementState, KeyEvent},
@@ -43,6 +44,20 @@ impl From<KeyEvent> for KeyboardInput {
         Self {
             state: value.state,
             key: value.physical_key,
+        }
+    }
+}
+
+#[derive(Event, Clone, Copy, PartialEq, Debug)]
+pub struct MouseMotion {
+    pub new_position: Vector2<f32>,
+}
+
+impl MouseMotion {
+    pub fn new<V2: Into<(f64, f64)>>(new_position: V2) -> Self {
+        let new_position = new_position.into();
+        Self {
+            new_position: vector![new_position.0 as f32, new_position.1 as f32],
         }
     }
 }

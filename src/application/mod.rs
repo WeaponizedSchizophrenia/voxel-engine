@@ -2,7 +2,6 @@ use std::collections::VecDeque;
 
 use bevy_ecs::{
     bundle::Bundle,
-    event::Events,
     schedule::{IntoSystemConfigs, Schedule, ScheduleLabel},
     system::{Res, Resource},
     world::{EntityWorldMut, World},
@@ -20,7 +19,7 @@ use winit::{
 use crate::{
     ecs::{
         components::{Chunk, Geometry, RenderDescriptor},
-        events::{window_events::KeyboardInput, WindowRenderRequested, WindowResized},
+        events::{window_events::{KeyboardInput, MouseMotion}, WindowRenderRequested, WindowResized},
         packages::{InitializationStage, Package},
         resources::{
             self, Generator, GpuInstance, PipelineServer, RenderContext, WindowRenderSurface,
@@ -29,7 +28,7 @@ use crate::{
         systems,
     },
     rendering::{index, vertex::Vertex},
-    utils::bevy::ScheduleExtensions as _,
+    utils::bevy::{ScheduleExtensions as _, WorldExtensions},
 };
 
 /// The main application object.
@@ -51,7 +50,6 @@ impl Application {
         world.add_schedule(Schedule::new(Update).with_systems(systems::generate_chunk_data));
         world.add_schedule(Schedule::new(Render).with_systems((
             systems::render_system,
-            systems::update_camera_system.before(systems::render_system),
         )));
         world.add_schedule(Schedule::new(Exit).with_systems(systems::save_config_system));
         world.add_schedule(Schedule::new(SentWindowEvent).with_systems((
@@ -97,9 +95,10 @@ impl Application {
         world.insert_resource(PipelineServer::default());
 
         world.insert_resource(Generator::new());
-        world.insert_resource(Events::<WindowResized>::default());
-        world.insert_resource(Events::<WindowRenderRequested>::default());
-        world.insert_resource(Events::<KeyboardInput>::default());
+        world.add_event::<MouseMotion>();
+        world.add_event::<WindowResized>();
+        world.add_event::<WindowRenderRequested>();
+        world.add_event::<KeyboardInput>();
 
         for x in -4..5 {
             for z in -4..5 {
@@ -129,8 +128,9 @@ impl Application {
         schedule: impl ScheduleLabel,
         systems: impl IntoSystemConfigs<M>,
     ) {
-        self.world
-            .add_schedule(Schedule::new(schedule).with_systems(systems));
+        self.world.schedule_scope(schedule, |_, schedule| {
+            schedule.add_systems(systems);
+        });
     }
 
     /// Adds the provided `package` to the application and returs self.
@@ -159,23 +159,24 @@ impl Application {
             }
 
             WindowEvent::Resized(new_size) => {
-                self.world.send_event(WindowResized::from(new_size));
-                self.world.run_schedule(SentWindowEvent);
+                self.world.send_event_and_notify(WindowResized::from(new_size));
             }
 
             WindowEvent::RedrawRequested => {
                 self.world.run_schedule(Render);
 
                 // After rendering request another render.
-                self.world.send_event(WindowRenderRequested);
-                self.world.run_schedule(SentWindowEvent);
+                self.world.send_event_and_notify(WindowRenderRequested);
             }
 
             WindowEvent::KeyboardInput {
                 event: key_event, ..
             } => {
-                self.world.send_event(KeyboardInput::from(key_event));
-                self.world.run_schedule(SentWindowEvent);
+                self.world.send_event_and_notify(KeyboardInput::from(key_event));
+            }
+            
+            WindowEvent::CursorMoved { position, .. } => {
+                self.world.send_event_and_notify(MouseMotion::new(position));
             }
 
             _ => {}

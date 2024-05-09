@@ -1,15 +1,18 @@
-use bevy_ecs::{event::EventReader, system::Query};
+use bevy_ecs::{event::EventReader, query::{Changed, With}, schedule::IntoSystemConfigs as _, system::{Query, Res}};
 use nalgebra::{point, vector};
 use winit::keyboard::KeyCode;
 
 use crate::ecs::{
-    components::{CameraController, CurrentCameraController},
-    events::window_events::KeyboardInput,
-    resources::Window,
-    schedules::Update,
+    events::{window_events::KeyboardInput, WindowResized},
+    resources::{Camera, RenderContext, Window},
+    schedules::{Render, SentWindowEvent}, systems,
 };
 
+pub use self::component::{CameraController, CurrentCameraController};
+
 use super::Package;
+
+mod component;
 
 pub struct CameraControllerPackage;
 
@@ -30,7 +33,8 @@ impl Package for CameraControllerPackage {
         };
 
         app.spawn((camera_controller, CurrentCameraController));
-        app.add_systems(Update, update_camera_controller_system);
+        app.add_systems(SentWindowEvent, (keybind_listener_system, resize_listener_system));
+        app.add_systems(Render, update_camera_system.before(systems::render_system));
     }
 
     fn intialization_stage(&self) -> super::InitializationStage {
@@ -40,7 +44,18 @@ impl Package for CameraControllerPackage {
     }
 }
 
-fn update_camera_controller_system(
+fn resize_listener_system(
+    mut events: EventReader<WindowResized>,
+    mut camera_controllers: Query<&mut CameraController>,
+) {
+    for event in events.read() {
+        for mut controller in camera_controllers.iter_mut() {
+            controller.aspect_ratio = event.new_width as f32 / event.new_height as f32;
+        }
+    }
+}
+
+fn keybind_listener_system(
     mut events: EventReader<KeyboardInput>,
     mut camera_controllers: Query<&mut CameraController>,
 ) {
@@ -80,6 +95,18 @@ fn update_camera_controller_system(
                 let speed = camera.speed;
                 camera.position += input_vector * speed;
             }
+        }
+    }
+}
+
+pub fn update_camera_system(
+    query: Query<&CameraController, (With<CurrentCameraController>, Changed<CameraController>)>,
+    render_context: Res<RenderContext>,
+    camera: Option<Res<Camera>>,
+) {
+    if let Some(camera) = camera {
+        if let Ok(controller) = query.get_single() {
+            camera.update_camera(&render_context.queue, controller.get_uniform());
         }
     }
 }

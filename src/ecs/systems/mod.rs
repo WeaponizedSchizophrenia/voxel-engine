@@ -10,5 +10,3 @@ mod chunk_systems;
 pub use chunk_systems::generate_chunk_data;
 mod init_camera_system;
 pub use init_camera_system::init_camera_system;
-mod update_camera_system;
-pub use update_camera_system::update_camera_system;
