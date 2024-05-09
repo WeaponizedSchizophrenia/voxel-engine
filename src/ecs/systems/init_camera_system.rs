@@ -1,7 +1,10 @@
 use bevy_ecs::system::{Commands, Res};
 
 use crate::{
-    ecs::resources::{Camera, PipelineServer, RenderContext},
+    ecs::{
+        packages::pipeline_server::PipelineServer,
+        resources::{Camera, RenderContext},
+    },
     rendering::pipelines::Pipeline,
 };
 

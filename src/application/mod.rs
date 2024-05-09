@@ -7,7 +7,6 @@ use bevy_ecs::{
     world::{EntityWorldMut, World},
 };
 use nalgebra::vector;
-use pollster::FutureExt;
 use winit::{
     application::ApplicationHandler,
     dpi::LogicalSize,
@@ -19,11 +18,12 @@ use winit::{
 use crate::{
     ecs::{
         components::{Chunk, Geometry, RenderDescriptor},
-        events::{window_events::{KeyboardInput, MouseMotion}, WindowRenderRequested, WindowResized},
-        packages::{InitializationStage, Package},
-        resources::{
-            self, Generator, GpuInstance, PipelineServer, RenderContext, WindowRenderSurface,
+        events::{
+            window_events::{KeyboardInput, MouseMotion},
+            WindowRenderRequested, WindowResized,
         },
+        packages::{window_surface::WindowSurfacePackage, InitializationStage, Package},
+        resources::{Generator, GpuInstance, RenderContext},
         schedules::{Exit, Init, Render, SentWindowEvent, Update, WindowInit},
         systems,
     },
@@ -42,16 +42,11 @@ impl Application {
     pub async fn new() -> anyhow::Result<Self> {
         let mut world = World::default();
 
-        world.add_schedule(Schedule::new(Init).with_systems((
-            systems::init_config_system,
-            systems::init_pipeline_server_system.after(systems::init_config_system),
-        )));
+        world.add_schedule(Schedule::new(Init));
         world.add_schedule(Schedule::new(WindowInit).with_systems(systems::init_camera_system));
         world.add_schedule(Schedule::new(Update).with_systems(systems::generate_chunk_data));
-        world.add_schedule(Schedule::new(Render).with_systems((
-            systems::render_system,
-        )));
-        world.add_schedule(Schedule::new(Exit).with_systems(systems::save_config_system));
+        world.add_schedule(Schedule::new(Render).with_systems((systems::render_system,)));
+        world.add_schedule(Schedule::new(Exit));
         world.add_schedule(Schedule::new(SentWindowEvent).with_systems((
             systems::rerender_request_system,
             systems::resized_system,
@@ -92,8 +87,6 @@ impl Application {
         world.insert_resource(gpu_instance);
         world.insert_resource(render_context);
 
-        world.insert_resource(PipelineServer::default());
-
         world.insert_resource(Generator::new());
         world.add_event::<MouseMotion>();
         world.add_event::<WindowResized>();
@@ -117,6 +110,11 @@ impl Application {
         self.world.get_resource_ref::<T>()
     }
 
+    /// Inserts the given `resource` into the world.
+    pub fn insert_resource<T: Resource>(&mut self, resource: T) {
+        self.world.insert_resource(resource);
+    }
+
     /// Spawns an entity with the provided `components`.
     pub fn spawn<B: Bundle>(&mut self, components: B) -> EntityWorldMut {
         self.world.spawn(components)
@@ -133,14 +131,24 @@ impl Application {
         });
     }
 
-    /// Adds the provided `package` to the application and returs self.
-    pub fn with_package<P: Package + 'static>(mut self, mut package: P) -> Self {
+    /// Runs the schedule with the provided `label`.
+    pub fn run_schedule(&mut self, label: impl ScheduleLabel) {
+        self.world.run_schedule(label)
+    }
+
+    /// Adds the provided `package` to the application.
+    pub fn add_package<P: Package + 'static>(&mut self, mut package: P) {
         match package.intialization_stage() {
-            InitializationStage::Init => package.initialize(&mut self),
+            InitializationStage::Init => package.initialize(self),
             InitializationStage::WindowInit => {
                 self.window_init_packages.push_back(Box::new(package))
             }
         }
+    }
+
+    /// Adds the provided `package` to the application and returs self.
+    pub fn with_package<P: Package + 'static>(mut self, package: P) -> Self {
+        self.add_package(package);
         self
     }
 
@@ -159,7 +167,8 @@ impl Application {
             }
 
             WindowEvent::Resized(new_size) => {
-                self.world.send_event_and_notify(WindowResized::from(new_size));
+                self.world
+                    .send_event_and_notify(WindowResized::from(new_size));
             }
 
             WindowEvent::RedrawRequested => {
@@ -172,9 +181,10 @@ impl Application {
             WindowEvent::KeyboardInput {
                 event: key_event, ..
             } => {
-                self.world.send_event_and_notify(KeyboardInput::from(key_event));
+                self.world
+                    .send_event_and_notify(KeyboardInput::from(key_event));
             }
-            
+
             WindowEvent::CursorMoved { position, .. } => {
                 self.world.send_event_and_notify(MouseMotion::new(position));
             }
@@ -196,29 +206,10 @@ impl ApplicationHandler for Application {
             }
         };
 
-        async {
-            let window = resources::Window::new(window);
-            match WindowRenderSurface::render_to_window(
-                &window,
-                self.world.get_resource::<GpuInstance>().unwrap(),
-                self.world.get_resource::<RenderContext>().unwrap(),
-            ) {
-                Ok(surface) => {
-                    self.world.insert_resource(window);
-                    self.world.insert_resource(surface);
-                    log::info!("Window and surface created");
-                    self.world.run_schedule(WindowInit);
-
-                    while let Some(mut package) = self.window_init_packages.pop_front() {
-                        package.initialize(self);
-                    }
-                }
-                Err(e) => {
-                    log::error!("Failed to create render surface: {e}");
-                }
-            };
+        self.add_package(WindowSurfacePackage::new(window));
+        while let Some(mut package) = self.window_init_packages.pop_front() {
+            package.initialize(self);
         }
-        .block_on();
     }
 
     fn window_event(

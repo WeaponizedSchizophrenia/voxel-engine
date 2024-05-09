@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use bevy_ecs::system::Resource;
 use thiserror::Error;
 use wgpu::{
@@ -7,7 +5,9 @@ use wgpu::{
     TextureUsages,
 };
 
-use crate::ecs::resources::{GpuInstance, RenderContext, Window};
+use crate::ecs::resources::{GpuInstance, RenderContext};
+
+use super::window::Window;
 
 /// A surface that can be rendererd to.
 #[derive(Resource)]

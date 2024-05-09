@@ -1,5 +1,8 @@
 use application::Application;
-use ecs::packages::camera_controller::CameraControllerPackage;
+use ecs::packages::{
+    camera_controller::CameraControllerPackage, config::ConfigPackage,
+    pipeline_server::PipelineServerPackage,
+};
 use log4rs::config::Deserializers;
 use winit::event_loop::{ControlFlow, EventLoop};
 
@@ -24,6 +27,8 @@ async fn main() -> anyhow::Result<()> {
 
     let mut app = Application::new()
         .await?
+        .with_package(ConfigPackage)
+        .with_package(PipelineServerPackage)
         .with_package(CameraControllerPackage);
     event_loop.run_app(&mut app)?;
 

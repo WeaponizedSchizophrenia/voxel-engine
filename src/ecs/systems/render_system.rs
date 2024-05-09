@@ -7,7 +7,10 @@ use wgpu::{
 use crate::{
     ecs::{
         components::{Geometry, RenderDescriptor},
-        resources::{Camera, Config, PipelineServer, RenderContext, WindowRenderSurface},
+        packages::{
+            config::Config, pipeline_server::PipelineServer, window_surface::WindowRenderSurface,
+        },
+        resources::{Camera, RenderContext},
     },
     rendering::pipelines::PipelineTrait as _,
 };

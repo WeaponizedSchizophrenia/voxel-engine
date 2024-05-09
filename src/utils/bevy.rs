@@ -1,4 +1,8 @@
-use bevy_ecs::{event::{Event, EventId, Events}, schedule::{IntoSystemConfigs, Schedule}, world::World};
+use bevy_ecs::{
+    event::{Event, EventId, Events},
+    schedule::{IntoSystemConfigs, Schedule},
+    world::World,
+};
 
 use crate::ecs::schedules::SentWindowEvent;
 
@@ -20,7 +24,7 @@ pub trait WorldExtensions {
     /// Adds the specified event to the world.
     fn add_event<E: Event>(&mut self);
     /// Sends the provided event and runs the `SentWindowEvent` schedule.
-    /// 
+    ///
     /// ## Returns
     /// `Option<EventId<E>>` - The id of the event if it was successfully sent.
     fn send_event_and_notify<E: Event>(&mut self, event: E) -> Option<EventId<E>>;
@@ -30,11 +34,10 @@ impl WorldExtensions for World {
     fn add_event<E: Event>(&mut self) {
         self.insert_resource(Events::<E>::default());
     }
-    
+
     fn send_event_and_notify<E: Event>(&mut self, event: E) -> Option<EventId<E>> {
         let res = self.send_event(event);
         self.run_schedule(SentWindowEvent);
         res
     }
-    
 }

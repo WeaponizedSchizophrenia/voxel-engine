@@ -1,6 +1,9 @@
 use crate::application::Application;
 
 pub mod camera_controller;
+pub mod config;
+pub mod pipeline_server;
+pub mod window_surface;
 
 /// The initialization stage of a package.
 pub enum InitializationStage {

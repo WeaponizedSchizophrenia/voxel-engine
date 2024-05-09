@@ -1,16 +1,22 @@
-use bevy_ecs::{event::EventReader, query::{Changed, With}, schedule::IntoSystemConfigs as _, system::{Query, Res}};
+use bevy_ecs::{
+    event::EventReader,
+    query::{Changed, With},
+    schedule::IntoSystemConfigs as _,
+    system::{Query, Res},
+};
 use nalgebra::{point, vector};
 use winit::keyboard::KeyCode;
 
 use crate::ecs::{
     events::{window_events::KeyboardInput, WindowResized},
-    resources::{Camera, RenderContext, Window},
-    schedules::{Render, SentWindowEvent}, systems,
+    resources::{Camera, RenderContext},
+    schedules::{Render, SentWindowEvent},
+    systems,
 };
 
 pub use self::component::{CameraController, CurrentCameraController};
 
-use super::Package;
+use super::{window_surface::Window, Package};
 
 mod component;
 
@@ -33,7 +39,10 @@ impl Package for CameraControllerPackage {
         };
 
         app.spawn((camera_controller, CurrentCameraController));
-        app.add_systems(SentWindowEvent, (keybind_listener_system, resize_listener_system));
+        app.add_systems(
+            SentWindowEvent,
+            (keybind_listener_system, resize_listener_system),
+        );
         app.add_systems(Render, update_camera_system.before(systems::render_system));
     }
 
