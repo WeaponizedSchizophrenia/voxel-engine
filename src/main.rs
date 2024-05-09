@@ -1,4 +1,5 @@
 use application::Application;
+use ecs::packages::camera_controller::CameraControllerPackage;
 use log4rs::config::Deserializers;
 use winit::event_loop::{ControlFlow, EventLoop};
 
@@ -21,7 +22,9 @@ async fn main() -> anyhow::Result<()> {
     let event_loop = EventLoop::new()?;
     event_loop.set_control_flow(ControlFlow::Poll);
 
-    let mut app = Application::new().await?;
+    let mut app = Application::new()
+        .await?
+        .with_package(CameraControllerPackage);
     event_loop.run_app(&mut app)?;
 
     Ok(())

@@ -1,5 +1,6 @@
 use bevy_ecs::system::Resource;
 use bytemuck::{Pod, Zeroable};
+use nalgebra::Matrix4;
 use wgpu::{
     util::{BufferInitDescriptor, DeviceExt},
     BindGroup, BindGroupDescriptor, BindGroupEntry, BindGroupLayout, BindGroupLayoutDescriptor,
@@ -52,10 +53,19 @@ impl Camera {
 }
 
 #[repr(C)]
-#[derive(Clone, Copy, Default, PartialEq, Pod, Zeroable)]
+#[derive(Clone, Copy, PartialEq, Pod, Zeroable)]
 pub struct CameraUniform {
     pub view_proj: [[f32; 4]; 4],
     pub position: [f32; 4],
+}
+
+impl Default for CameraUniform {
+    fn default() -> Self {
+        Self {
+            view_proj: Matrix4::identity().into(),
+            position: [0.0; 4],
+        }
+    }
 }
 
 pub const CAMERA_BIND_GROUP_LAYOUT_DESCRIPTOR: BindGroupLayoutDescriptor =

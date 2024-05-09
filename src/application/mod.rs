@@ -1,7 +1,11 @@
+use std::collections::VecDeque;
+
 use bevy_ecs::{
+    bundle::Bundle,
     event::Events,
-    schedule::{IntoSystemConfigs as _, Schedule},
-    world::World,
+    schedule::{IntoSystemConfigs, Schedule, ScheduleLabel},
+    system::{Res, Resource},
+    world::{EntityWorldMut, World},
 };
 use nalgebra::vector;
 use pollster::FutureExt;
@@ -17,6 +21,7 @@ use crate::{
     ecs::{
         components::{Chunk, Geometry, RenderDescriptor},
         events::{window_events::KeyboardInput, WindowRenderRequested, WindowResized},
+        packages::{InitializationStage, Package},
         resources::{
             self, Generator, GpuInstance, PipelineServer, RenderContext, WindowRenderSurface,
         },
@@ -30,6 +35,7 @@ use crate::{
 /// The main application object.
 pub struct Application {
     world: World,
+    window_init_packages: VecDeque<Box<dyn Package>>,
 }
 
 impl Application {
@@ -101,7 +107,41 @@ impl Application {
             }
         }
 
-        Ok(Self { world })
+        Ok(Self {
+            world,
+            window_init_packages: VecDeque::new(),
+        })
+    }
+
+    /// Gets the specified `Resource`. If it does not exist returns None.
+    pub fn get_resource<T: Resource>(&self) -> Option<Res<T>> {
+        self.world.get_resource_ref::<T>()
+    }
+
+    /// Spawns an entity with the provided `components`.
+    pub fn spawn<B: Bundle>(&mut self, components: B) -> EntityWorldMut {
+        self.world.spawn(components)
+    }
+
+    /// Adds the provided `systems` to the provided `schedule`.
+    pub fn add_systems<M>(
+        &mut self,
+        schedule: impl ScheduleLabel,
+        systems: impl IntoSystemConfigs<M>,
+    ) {
+        self.world
+            .add_schedule(Schedule::new(schedule).with_systems(systems));
+    }
+
+    /// Adds the provided `package` to the application and returs self.
+    pub fn with_package<P: Package + 'static>(mut self, mut package: P) -> Self {
+        match package.intialization_stage() {
+            InitializationStage::Init => package.initialize(&mut self),
+            InitializationStage::WindowInit => {
+                self.window_init_packages.push_back(Box::new(package))
+            }
+        }
+        self
     }
 
     /// Returns the attributes for the main window.
@@ -167,6 +207,10 @@ impl ApplicationHandler for Application {
                     self.world.insert_resource(surface);
                     log::info!("Window and surface created");
                     self.world.run_schedule(WindowInit);
+
+                    while let Some(mut package) = self.window_init_packages.pop_front() {
+                        package.initialize(self);
+                    }
                 }
                 Err(e) => {
                     log::error!("Failed to create render surface: {e}");
