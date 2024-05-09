@@ -19,7 +19,7 @@ use crate::{
     ecs::{
         components::{Chunk, Geometry, RenderDescriptor},
         events::{
-            window_events::{KeyboardInput, MouseMotion},
+            window_events::{self, KeyboardInput, MouseButtonInput, MouseMoved},
             WindowRenderRequested, WindowResized,
         },
         packages::{window_surface::WindowSurfacePackage, InitializationStage, Package},
@@ -88,10 +88,7 @@ impl Application {
         world.insert_resource(render_context);
 
         world.insert_resource(Generator::new());
-        world.add_event::<MouseMotion>();
-        world.add_event::<WindowResized>();
-        world.add_event::<WindowRenderRequested>();
-        world.add_event::<KeyboardInput>();
+        window_events::register_window_events(&mut world);
 
         for x in -4..5 {
             for z in -4..5 {
@@ -186,7 +183,12 @@ impl Application {
             }
 
             WindowEvent::CursorMoved { position, .. } => {
-                self.world.send_event_and_notify(MouseMotion::new(position));
+                self.world.send_event_and_notify(MouseMoved::from(position));
+            }
+
+            WindowEvent::MouseInput { state, button, .. } => {
+                self.world
+                    .send_event_and_notify(MouseButtonInput { state, button });
             }
 
             _ => {}

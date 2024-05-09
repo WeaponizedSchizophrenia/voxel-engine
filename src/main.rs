@@ -1,7 +1,7 @@
 use application::Application;
 use ecs::packages::{
     camera_controller::CameraControllerPackage, config::ConfigPackage,
-    pipeline_server::PipelineServerPackage,
+    input_provider::InputProviderPackage, pipeline_server::PipelineServerPackage,
 };
 use log4rs::config::Deserializers;
 use winit::event_loop::{ControlFlow, EventLoop};
@@ -29,6 +29,7 @@ async fn main() -> anyhow::Result<()> {
         .await?
         .with_package(ConfigPackage)
         .with_package(PipelineServerPackage)
+        .with_package(InputProviderPackage)
         .with_package(CameraControllerPackage);
     event_loop.run_app(&mut app)?;
 

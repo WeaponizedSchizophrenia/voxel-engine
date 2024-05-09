@@ -4,11 +4,11 @@ use bevy_ecs::{
     schedule::IntoSystemConfigs as _,
     system::{Query, Res},
 };
-use nalgebra::{point, vector};
-use winit::keyboard::KeyCode;
+use nalgebra::{point, vector, Vector3};
+use winit::{event::MouseButton, keyboard::KeyCode};
 
 use crate::ecs::{
-    events::{window_events::KeyboardInput, WindowResized},
+    events::{window_events::MouseMotion, WindowResized},
     resources::{Camera, RenderContext},
     schedules::{Render, SentWindowEvent},
     systems,
@@ -16,7 +16,11 @@ use crate::ecs::{
 
 pub use self::component::{CameraController, CurrentCameraController};
 
-use super::{window_surface::Window, Package};
+use super::{
+    input_provider::{self, InputProvider},
+    window_surface::Window,
+    Package,
+};
 
 mod component;
 
@@ -42,8 +46,13 @@ impl Package for CameraControllerPackage {
         app.spawn((camera_controller, CurrentCameraController));
         app.add_systems(
             SentWindowEvent,
-            (keybind_listener_system, resize_listener_system),
+            (
+                update_system,
+                resize_listener_system,
+                mouse_motion_listener_system.after(input_provider::mouse_motion_listener_system),
+            ),
         );
+        // app.add_systems(Update, update_system);
         app.add_systems(Render, update_camera_system.before(systems::render_system));
     }
 
@@ -54,6 +63,65 @@ impl Package for CameraControllerPackage {
     }
 }
 
+pub fn mouse_motion_listener_system(
+    mut events: EventReader<MouseMotion>,
+    mut camera_controllers: Query<&mut CameraController>,
+    input_provider: Res<InputProvider>,
+) {
+    if input_provider.is_mouse_button_pressed(MouseButton::Right) {
+        for event in events.read() {
+            for mut controller in camera_controllers.iter_mut() {
+                let delta = event.delta * controller.sensitivity;
+
+                controller.pitch += delta.y;
+                controller.yaw -= delta.x;
+            }
+        }
+    } else {
+        events.clear();
+    }
+}
+
+pub fn update_system(
+    mut camera_controllers: Query<&mut CameraController>,
+    input_provider: Res<InputProvider>,
+) {
+    let input_vector = vector![
+        if input_provider.is_pressed(KeyCode::KeyA) {
+            -1.0
+        } else if input_provider.is_pressed(KeyCode::KeyD) {
+            1.0
+        } else {
+            0.0
+        },
+        if input_provider.is_pressed(KeyCode::KeyE) {
+            -1.0
+        } else if input_provider.is_pressed(KeyCode::KeyQ) {
+            1.0
+        } else {
+            0.0
+        },
+        if input_provider.is_pressed(KeyCode::KeyS) {
+            1.0
+        } else if input_provider.is_pressed(KeyCode::KeyW) {
+            -1.0
+        } else {
+            0.0
+        }
+    ];
+
+    if input_vector == Vector3::zeros() {
+        return;
+    }
+
+    let input_vector = input_vector.normalize();
+
+    for mut controller in camera_controllers.iter_mut() {
+        let speed = controller.speed;
+        controller.position += input_vector * speed;
+    }
+}
+
 fn resize_listener_system(
     mut events: EventReader<WindowResized>,
     mut camera_controllers: Query<&mut CameraController>,
@@ -61,50 +129,6 @@ fn resize_listener_system(
     for event in events.read() {
         for mut controller in camera_controllers.iter_mut() {
             controller.aspect_ratio = event.new_width as f32 / event.new_height as f32;
-        }
-    }
-}
-
-fn keybind_listener_system(
-    mut events: EventReader<KeyboardInput>,
-    mut camera_controllers: Query<&mut CameraController>,
-) {
-    for event in events.read() {
-        if let winit::keyboard::PhysicalKey::Code(code) = event.key {
-            let input_vector = vector![
-                if code == KeyCode::KeyA {
-                    -1.0
-                } else if code == KeyCode::KeyD {
-                    1.0
-                } else {
-                    0.0
-                },
-                if code == KeyCode::KeyE {
-                    1.0
-                } else if code == KeyCode::KeyQ {
-                    -1.0
-                } else {
-                    0.0
-                },
-                if code == KeyCode::KeyS {
-                    1.0
-                } else if code == KeyCode::KeyW {
-                    -1.0
-                } else {
-                    0.0
-                },
-            ];
-
-            if input_vector == vector![0.0, 0.0, 0.0] {
-                continue;
-            }
-
-            let input_vector = input_vector.normalize();
-
-            for mut camera in camera_controllers.iter_mut() {
-                let speed = camera.speed;
-                camera.position += input_vector * speed;
-            }
         }
     }
 }

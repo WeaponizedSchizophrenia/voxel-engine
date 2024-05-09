@@ -23,7 +23,7 @@ impl Default for CameraController {
     fn default() -> Self {
         Self {
             speed: 0.1,
-            sensitivity: 1.0,
+            sensitivity: 0.005,
             position: Default::default(),
             aspect_ratio: 16.0 / 9.0,
             fov: std::f32::consts::FRAC_PI_3,

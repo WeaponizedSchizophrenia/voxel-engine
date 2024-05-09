@@ -1,10 +1,12 @@
-use bevy_ecs::event::Event;
+use bevy_ecs::{event::Event, world::World};
 use nalgebra::{vector, Vector2};
 use winit::{
-    dpi::PhysicalSize,
-    event::{ElementState, KeyEvent},
+    dpi::{PhysicalPosition, PhysicalSize},
+    event::{ElementState, KeyEvent, MouseButton},
     keyboard::PhysicalKey,
 };
+
+use crate::utils::bevy::WorldExtensions;
 
 /// Window resized event, contains the new width and height.
 #[derive(Event, Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -48,16 +50,39 @@ impl From<KeyEvent> for KeyboardInput {
     }
 }
 
+/// Mouse moved in the window, provides the delta.
 #[derive(Event, Clone, Copy, PartialEq, Debug)]
 pub struct MouseMotion {
+    pub delta: Vector2<f32>,
+}
+
+/// Mouse moved in the window, provides the position.
+#[derive(Event, Clone, Copy, PartialEq, Debug)]
+pub struct MouseMoved {
     pub new_position: Vector2<f32>,
 }
 
-impl MouseMotion {
-    pub fn new<V2: Into<(f64, f64)>>(new_position: V2) -> Self {
-        let new_position = new_position.into();
+impl From<PhysicalPosition<f64>> for MouseMoved {
+    fn from(value: PhysicalPosition<f64>) -> Self {
         Self {
-            new_position: vector![new_position.0 as f32, new_position.1 as f32],
+            new_position: vector![value.x as f32, value.y as f32],
         }
     }
+}
+
+/// A mouse button input event has been recieved for the window.
+#[derive(Event, Clone, Copy, PartialEq, Debug)]
+pub struct MouseButtonInput {
+    pub state: ElementState,
+    pub button: MouseButton,
+}
+
+/// Registers all the window events to the provided `World`.
+pub fn register_window_events(world: &mut World) {
+    world.add_event::<WindowResized>();
+    world.add_event::<WindowRenderRequested>();
+    world.add_event::<KeyboardInput>();
+    world.add_event::<MouseMotion>();
+    world.add_event::<MouseMoved>();
+    world.add_event::<MouseButtonInput>();
 }

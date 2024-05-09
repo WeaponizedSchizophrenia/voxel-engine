@@ -2,6 +2,7 @@ use crate::application::Application;
 
 pub mod camera_controller;
 pub mod config;
+pub mod input_provider;
 pub mod pipeline_server;
 pub mod window_surface;
 
