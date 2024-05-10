@@ -44,7 +44,7 @@ pub struct Application {
 
 impl Application {
     /// Creates a new `Application` instance.
-    pub async fn new() -> anyhow::Result<Self> {
+    pub fn new() -> anyhow::Result<Self> {
         let mut world = World::default();
 
         // Todo: Removes the systems from the schedule declarations.
@@ -54,11 +54,7 @@ impl Application {
         world.add_schedule(Schedule::new(Update).with_systems(systems::generate_chunk_data));
         world.add_schedule(Schedule::new(Render).with_systems((systems::render_system,)));
         world.add_schedule(Schedule::new(Exit));
-        world.add_schedule(Schedule::new(SentWindowEvent).with_systems((
-            systems::rerender_request_system,
-            systems::resized_system,
-            systems::keyboard_input_system,
-        )));
+        world.add_schedule(Schedule::new(SentWindowEvent));
 
         // TODO: Move the generator into a package.
         world.insert_resource(Generator::new());
@@ -83,7 +79,7 @@ impl Application {
 
         // TEMPORARY
         // Spawn the hello quad.
-        app.world.spawn((
+        app.spawn((
             RenderDescriptor::new("voxel".to_owned()),
             Geometry::new(
                 &app.get_resource::<RenderContext>().unwrap().device,

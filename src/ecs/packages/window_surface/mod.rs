@@ -1,13 +1,13 @@
 mod window;
 use std::mem;
 
+use bevy_ecs::{event::EventReader, system::{Res, ResMut}};
 pub use window::Window;
 mod surface;
 pub use surface::WindowRenderSurface;
 
 use crate::ecs::{
-    packages::render_init::{GpuInstance, RenderContext},
-    schedules::WindowInit,
+    events::{WindowRenderRequested, WindowResized}, packages::render_init::{GpuInstance, RenderContext}, schedules::{SentWindowEvent, WindowInit}
 };
 
 use super::Package;
@@ -65,6 +65,35 @@ impl Package for WindowSurfacePackage {
 
         log::info!("Window and surface created");
 
+        app.add_systems(SentWindowEvent, (rerender_request_system, resized_system));
+
         app.run_schedule(WindowInit);
+    }
+}
+
+/// Requests a rerender for each window.
+fn rerender_request_system(
+    mut events: EventReader<WindowRenderRequested>,
+    window: Option<Res<Window>>,
+) {
+    if let Some(window) = window {
+        for _event in events.read() {
+            window.request_rerender();
+        }
+    }
+}
+
+/// Resizes the surface if one exists.
+fn resized_system(
+    mut events: EventReader<WindowResized>,
+    surface: Option<ResMut<WindowRenderSurface>>,
+    render_context: Res<RenderContext>,
+) {
+    if let Some(mut surface) = surface {
+        for event in events.read() {
+            surface.resize(&render_context, event.as_tuple());
+        }
+    } else {
+        log::warn!("No surface to resize.");
     }
 }

@@ -3,7 +3,6 @@ use ecs::packages::{
     camera_controller::CameraControllerPackage, config::ConfigPackage,
     input_provider::InputProviderPackage, pipeline_server::PipelineServerPackage,
 };
-use log4rs::config::Deserializers;
 use winit::event_loop::{ControlFlow, EventLoop};
 
 mod application;
@@ -12,8 +11,7 @@ mod ecs;
 mod rendering;
 mod utils;
 
-#[pollster::main]
-async fn main() -> anyhow::Result<()> {
+fn main() -> anyhow::Result<()> {
     match init_logging() {
         Ok(_) => log::info!("Logging intialized"),
         Err(e) => {
@@ -25,8 +23,7 @@ async fn main() -> anyhow::Result<()> {
     let event_loop = EventLoop::new()?;
     event_loop.set_control_flow(ControlFlow::Poll);
 
-    let mut app = Application::new()
-        .await?
+    let mut app = Application::new()?
         .with_package(ConfigPackage)
         .with_package(PipelineServerPackage)
         .with_package(InputProviderPackage)
@@ -37,5 +34,5 @@ async fn main() -> anyhow::Result<()> {
 }
 
 fn init_logging() -> Result<(), anyhow::Error> {
-    log4rs::init_file("./config/log.yaml", Deserializers::default())
+    log4rs::init_file("./config/log.yaml", Default::default())
 }
