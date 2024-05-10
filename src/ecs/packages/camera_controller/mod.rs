@@ -131,16 +131,13 @@ fn update_system(
     let input_vector = input_vector.normalize();
     let delta_time = time.get_delta_time().get_seconds();
 
-    
     for mut controller in camera_controllers.iter_mut() {
         let direction = controller.get_direction();
-        let relative_matrix = Matrix3::from_columns(
-            &[
-                direction.cross(&Vector3::y_axis()),
-                *Vector3::y_axis(),
-                *direction,
-            ]
-        );
+        let relative_matrix = Matrix3::from_columns(&[
+            direction.cross(&Vector3::y_axis()),
+            *Vector3::y_axis(),
+            *direction,
+        ]);
         let speed = controller.speed;
         controller.position += relative_matrix * input_vector * speed * delta_time;
     }

@@ -17,6 +17,12 @@ pub struct ChunkPackage;
 
 impl Package for ChunkPackage {
     fn initialize(&mut self, app: &mut crate::application::Application) {
+        for x in -5..6 {
+            for z in -5..6 {
+                app.spawn(Chunk::new(Vector2::new(x, z)));
+            }
+        }
+
         app.spawn(Chunk::new(Vector2::zeros()));
 
         app.add_systems(

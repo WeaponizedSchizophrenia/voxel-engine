@@ -22,7 +22,7 @@ impl Package for GeneratorPackage {
             None => {
                 log::error!("Failed to get config");
                 return;
-            },
+            }
         };
         app.insert_resource(Generator::new(config.seed, config.noise_frequency));
         app.add_systems(Update, generate_chunk_data);

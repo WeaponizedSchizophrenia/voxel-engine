@@ -7,7 +7,7 @@ use wgpu::{
 
 use crate::{
     ecs::resources::camera,
-    rendering::{depth_texture, vertex::Vertex},
+    rendering::{depth_texture, instance::Instance, vertex::Vertex},
 };
 
 /// A pipeline for rendering voxels.
@@ -55,7 +55,7 @@ impl VoxelPipeline {
                     constants: &constants,
                     zero_initialize_workgroup_memory: false,
                 },
-                buffers: &[Vertex::buffer_layout()],
+                buffers: &[Vertex::buffer_layout(), Instance::buffer_layout()],
             },
             primitive: PrimitiveState {
                 topology: PrimitiveTopology::TriangleList,

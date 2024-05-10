@@ -1,12 +1,17 @@
 use std::collections::HashMap;
 
 use crate::{
-    common::{self, chunk::BinaryVoxelContainer, face_dir::FaceDir, Voxel},
+    common::{
+        self,
+        chunk::{self, BinaryVoxelContainer},
+        face_dir::FaceDir,
+        Voxel,
+    },
     ecs::packages::render_init::RenderContext,
-    rendering::{index, vertex::Vertex},
+    rendering::{index, instance::Instance, vertex::Vertex},
 };
 use bevy_ecs::component::Component;
-use nalgebra::Vector2;
+use nalgebra::{vector, Matrix4, Vector2};
 
 pub use crate::common::chunk::CHUNK_LENGTH;
 
@@ -65,6 +70,7 @@ impl Chunk {
     }
 
     pub fn build_mesh(&self, render_context: &RenderContext) -> HashMap<Voxel, Geometry> {
+        log::info!("Building chunk mesh for chunk at: {:?}", self.index);
         let mut meshes: HashMap<Voxel, (Vec<Vertex>, Vec<u16>)> = HashMap::default();
 
         const ONE: BinaryVoxelContainer = 1;
@@ -158,9 +164,17 @@ impl Chunk {
             .map(|(voxel, (vertices, indices))| {
                 (
                     voxel,
-                    Geometry::new(
+                    Geometry::new_instanced(
                         &render_context.device,
                         &vertices,
+                        &[Instance {
+                            model_matrix: Matrix4::new_translation(&vector![
+                                self.index.x as f32 * chunk::CHUNK_LENGTH as f32,
+                                0.0,
+                                self.index.y as f32 * chunk::CHUNK_LENGTH as f32
+                            ])
+                            .into(),
+                        }],
                         &indices,
                         index::INDEX_FORMAT,
                     ),
