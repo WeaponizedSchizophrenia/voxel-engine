@@ -6,7 +6,6 @@ use bevy_ecs::{
     system::{Res, Resource},
     world::{EntityWorldMut, World},
 };
-use nalgebra::vector;
 use winit::{
     application::ApplicationHandler,
     dpi::LogicalSize,
@@ -17,7 +16,7 @@ use winit::{
 
 use crate::{
     ecs::{
-        components::{Chunk, Geometry, RenderDescriptor},
+        components::{Geometry, RenderDescriptor},
         events::{
             window_events::{self, KeyboardInput, MouseButtonInput, MouseMoved},
             WindowRenderRequested, WindowResized,
@@ -28,7 +27,6 @@ use crate::{
             window_surface::WindowSurfacePackage,
             InitializationStage, Package,
         },
-        resources::Generator,
         schedules::{EarlyUpdate, Exit, Init, Render, SentWindowEvent, Update, WindowInit},
         systems,
     },
@@ -51,22 +49,12 @@ impl Application {
         world.add_schedule(Schedule::new(Init));
         world.add_schedule(Schedule::new(WindowInit).with_systems(systems::init_camera_system));
         world.add_schedule(Schedule::new(EarlyUpdate));
-        world.add_schedule(Schedule::new(Update).with_systems(systems::generate_chunk_data));
-        world.add_schedule(Schedule::new(Render).with_systems((systems::render_system,)));
+        world.add_schedule(Schedule::new(Update));
+        world.add_schedule(Schedule::new(Render).with_systems(systems::render_system));
         world.add_schedule(Schedule::new(Exit));
         world.add_schedule(Schedule::new(SentWindowEvent));
 
-        // TODO: Move the generator into a package.
-        world.insert_resource(Generator::new());
-
         window_events::register_window_events(&mut world);
-
-        // TEMPORARY
-        for x in -4..5 {
-            for z in -4..5 {
-                world.spawn(Chunk::new(vector![x, z]));
-            }
-        }
 
         let mut app = Self {
             world,
