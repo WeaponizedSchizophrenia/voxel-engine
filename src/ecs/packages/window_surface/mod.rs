@@ -1,13 +1,25 @@
 mod window;
 use std::mem;
 
-use bevy_ecs::{event::EventReader, system::{Res, ResMut}};
+use bevy_ecs::{
+    event::EventReader,
+    system::{Res, ResMut},
+};
 pub use window::Window;
 mod surface;
 pub use surface::WindowRenderSurface;
 
-use crate::ecs::{
-    events::{WindowRenderRequested, WindowResized}, packages::render_init::{GpuInstance, RenderContext}, schedules::{SentWindowEvent, WindowInit}
+use crate::{
+    ecs::{
+        events::{WindowRenderRequested, WindowResized},
+        packages::{
+            pipeline_server::PipelineServer,
+            render_init::{GpuInstance, RenderContext},
+        },
+        resources::Camera,
+        schedules::{SentWindowEvent, WindowInit},
+    },
+    rendering::pipelines::Pipeline,
 };
 
 use super::Package;
@@ -44,11 +56,25 @@ impl Package for WindowSurfacePackage {
                 return;
             }
         };
+        let pipeline_server = match app.get_resource::<PipelineServer>() {
+            Some(server) => server,
+            None => {
+                log::error!("Failed to get PipelineServer");
+                return;
+            }
+        };
+        let voxel_pipeline = match pipeline_server.get_pipeline("voxel").map(AsRef::as_ref) {
+            Some(Pipeline::Voxel(voxel)) => voxel,
+            None => {
+                log::error!("Failed to get Voxel pipeline");
+                return;
+            }
+        };
 
-        // This can be safely unwraped.
+        // This takes ownershilp of data inside &mut self and replaces it with an empty `Self`
         let window = mem::replace(self, Self { winit_window: None })
             .winit_window
-            .unwrap();
+            .unwrap(); // This can be safely unwraped.
 
         let window = Window::new(window);
         let surface =
@@ -60,6 +86,11 @@ impl Package for WindowSurfacePackage {
                 }
             };
 
+        app.insert_resource(Camera::new(
+            &render_context.device,
+            Default::default(),
+            &voxel_pipeline.camera_bind_group_layout,
+        ));
         app.insert_resource(window);
         app.insert_resource(surface);
 

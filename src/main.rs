@@ -1,6 +1,7 @@
 use application::Application;
 use ecs::packages::{
-    camera_controller::CameraControllerPackage, config::ConfigPackage, generator::GeneratorPackage, input_provider::InputProviderPackage, pipeline_server::PipelineServerPackage
+    camera_controller::CameraControllerPackage, config::ConfigPackage, generator::GeneratorPackage,
+    input_provider::InputProviderPackage, pipeline_server::PipelineServerPackage,
 };
 use winit::event_loop::{ControlFlow, EventLoop};
 

@@ -1,9 +1,15 @@
-use crate::{common::{chunk, Voxel}, ecs::{components::Chunk, schedules::Update}};
+use crate::{
+    common::{chunk, Voxel},
+    ecs::{components::Chunk, schedules::Update},
+};
 
 use super::Package;
 
 mod resource;
-use bevy_ecs::{query::Added, system::{Query, Res}};
+use bevy_ecs::{
+    query::Added,
+    system::{Query, Res},
+};
 pub use resource::Generator;
 
 pub struct GeneratorPackage;

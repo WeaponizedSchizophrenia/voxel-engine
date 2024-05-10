@@ -47,7 +47,7 @@ impl Application {
 
         // Todo: Removes the systems from the schedule declarations.
         world.add_schedule(Schedule::new(Init));
-        world.add_schedule(Schedule::new(WindowInit).with_systems(systems::init_camera_system));
+        world.add_schedule(Schedule::new(WindowInit));
         world.add_schedule(Schedule::new(EarlyUpdate));
         world.add_schedule(Schedule::new(Update));
         world.add_schedule(Schedule::new(Render).with_systems(systems::render_system));

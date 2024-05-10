@@ -2,12 +2,12 @@ use crate::application::Application;
 
 pub mod camera_controller;
 pub mod config;
+pub mod generator;
 pub mod input_provider;
 pub mod pipeline_server;
 pub mod render_init;
 pub mod time;
 pub mod window_surface;
-pub mod generator;
 
 /// The initialization stage of a package.
 pub enum InitializationStage {
