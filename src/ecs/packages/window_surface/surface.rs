@@ -5,7 +5,7 @@ use wgpu::{
     TextureUsages,
 };
 
-use crate::ecs::resources::{GpuInstance, RenderContext};
+use crate::ecs::packages::render_init::{GpuInstance, RenderContext};
 
 use super::window::Window;
 

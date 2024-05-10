@@ -23,9 +23,12 @@ use crate::{
             WindowRenderRequested, WindowResized,
         },
         packages::{
-            time::TimePackage, window_surface::WindowSurfacePackage, InitializationStage, Package,
+            render_init::{RenderContext, RenderInitPackage},
+            time::TimePackage,
+            window_surface::WindowSurfacePackage,
+            InitializationStage, Package,
         },
-        resources::{Generator, GpuInstance, RenderContext},
+        resources::Generator,
         schedules::{EarlyUpdate, Exit, Init, Render, SentWindowEvent, Update, WindowInit},
         systems,
     },
@@ -57,16 +60,33 @@ impl Application {
             systems::keyboard_input_system,
         )));
 
-        // TODO: Move the gpu instance and render context into a package.
-        let gpu_instance = GpuInstance::new().await?;
-        let render_context = RenderContext::new(&gpu_instance).await?;
+        // TODO: Move the generator into a package.
+        world.insert_resource(Generator::new());
+
+        window_events::register_window_events(&mut world);
+
+        // TEMPORARY
+        for x in -4..5 {
+            for z in -4..5 {
+                world.spawn(Chunk::new(vector![x, z]));
+            }
+        }
+
+        let mut app = Self {
+            world,
+            window_init_packages: VecDeque::new(),
+        };
+
+        // Add the basic "base" packages.
+        app.add_package(RenderInitPackage);
+        app.add_package(TimePackage);
 
         // TEMPORARY
         // Spawn the hello quad.
-        world.spawn((
+        app.world.spawn((
             RenderDescriptor::new("voxel".to_owned()),
             Geometry::new(
-                &render_context.device,
+                &app.get_resource::<RenderContext>().unwrap().device,
                 &[
                     Vertex {
                         position: [-0.5, -0.5, 0.0],
@@ -89,29 +109,6 @@ impl Application {
                 index::INDEX_FORMAT,
             ),
         ));
-
-        world.insert_resource(gpu_instance);
-        world.insert_resource(render_context);
-
-        // TODO: Move the generator into a package.
-        world.insert_resource(Generator::new());
-
-        window_events::register_window_events(&mut world);
-
-        // TEMPORARY
-        for x in -4..5 {
-            for z in -4..5 {
-                world.spawn(Chunk::new(vector![x, z]));
-            }
-        }
-
-        let mut app = Self {
-            world,
-            window_init_packages: VecDeque::new(),
-        };
-
-        // Add the basic "base" packages.
-        app.add_package(TimePackage);
 
         Ok(app)
     }

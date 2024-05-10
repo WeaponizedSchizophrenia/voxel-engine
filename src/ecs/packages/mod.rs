@@ -4,6 +4,7 @@ pub mod camera_controller;
 pub mod config;
 pub mod input_provider;
 pub mod pipeline_server;
+pub mod render_init;
 pub mod time;
 pub mod window_surface;
 

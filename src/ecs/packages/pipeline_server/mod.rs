@@ -2,12 +2,11 @@ mod resource;
 pub use resource::PipelineServer;
 
 use crate::{
-    ecs::resources::RenderContext,
     rendering::pipelines::{Pipeline, VoxelPipeline},
     utils::file_system,
 };
 
-use super::Package;
+use super::{render_init::RenderContext, Package};
 
 /// Package for the pipeline server.
 pub struct PipelineServerPackage;

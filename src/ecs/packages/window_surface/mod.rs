@@ -6,7 +6,7 @@ mod surface;
 pub use surface::WindowRenderSurface;
 
 use crate::ecs::{
-    resources::{GpuInstance, RenderContext},
+    packages::render_init::{GpuInstance, RenderContext},
     schedules::WindowInit,
 };
 

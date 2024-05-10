@@ -5,8 +5,10 @@ use bevy_ecs::{
 
 use crate::ecs::{
     events::{window_events::KeyboardInput, WindowRenderRequested, WindowResized},
-    packages::window_surface::{Window, WindowRenderSurface},
-    resources::RenderContext,
+    packages::{
+        render_init::RenderContext,
+        window_surface::{Window, WindowRenderSurface},
+    },
 };
 
 /// Requests a rerender for each window.

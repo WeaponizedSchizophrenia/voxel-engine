@@ -9,7 +9,7 @@ use winit::{event::MouseButton, keyboard::KeyCode};
 
 use crate::ecs::{
     events::{window_events::MouseMotion, WindowResized},
-    resources::{Camera, RenderContext},
+    resources::Camera,
     schedules::{Render, SentWindowEvent},
     systems,
 };
@@ -18,6 +18,7 @@ pub use self::component::{CameraController, CurrentCameraController};
 
 use super::{
     input_provider::{self, InputProvider},
+    render_init::RenderContext,
     time::Time,
     window_surface::Window,
     Package,

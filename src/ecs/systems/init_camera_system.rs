@@ -2,8 +2,8 @@ use bevy_ecs::system::{Commands, Res};
 
 use crate::{
     ecs::{
-        packages::pipeline_server::PipelineServer,
-        resources::{Camera, RenderContext},
+        packages::{pipeline_server::PipelineServer, render_init::RenderContext},
+        resources::Camera,
     },
     rendering::pipelines::Pipeline,
 };

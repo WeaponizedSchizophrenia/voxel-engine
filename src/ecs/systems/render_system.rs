@@ -8,9 +8,10 @@ use crate::{
     ecs::{
         components::{Geometry, RenderDescriptor},
         packages::{
-            config::Config, pipeline_server::PipelineServer, window_surface::WindowRenderSurface,
+            config::Config, pipeline_server::PipelineServer, render_init::RenderContext,
+            window_surface::WindowRenderSurface,
         },
-        resources::{Camera, RenderContext},
+        resources::Camera,
     },
     rendering::pipelines::PipelineTrait as _,
 };
