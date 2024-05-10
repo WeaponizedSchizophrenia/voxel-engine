@@ -17,11 +17,7 @@ use crate::ecs::{
 pub use self::component::{CameraController, CurrentCameraController};
 
 use super::{
-    input_provider::{self, InputProvider},
-    render_init::RenderContext,
-    time::Time,
-    window_surface::Window,
-    Package,
+    config::Config, input_provider::{self, InputProvider}, render_init::RenderContext, time::Time, window_surface::Window, Package
 };
 
 mod component;
@@ -34,7 +30,14 @@ impl Package for CameraControllerPackage {
         let window = match app.get_resource::<Window>() {
             Some(win) => win,
             None => {
-                log::error!(target: "CameraControllerPackage", "Failed to get window");
+                log::error!("Failed to get window");
+                return;
+            }
+        };
+        let config = match app.get_resource::<Config>() {
+            Some(cfg) => cfg,
+            None => {
+                log::error!("Failed to get config");
                 return;
             }
         };
@@ -42,6 +45,7 @@ impl Package for CameraControllerPackage {
         let camera_controller = CameraController {
             position: point![0.0, 1.0, 4.0],
             aspect_ratio: window.get_aspect_ratio(),
+            sensitivity: config.sensitivity,
             ..Default::default()
         };
 
