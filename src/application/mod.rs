@@ -16,13 +16,12 @@ use winit::{
 
 use crate::{
     ecs::{
-        components::{Geometry, RenderDescriptor},
         events::{
             window_events::{self, KeyboardInput, MouseButtonInput, MouseMoved},
             WindowRenderRequested, WindowResized,
         },
         packages::{
-            render_init::{RenderContext, RenderInitPackage},
+            render_init::RenderInitPackage,
             time::TimePackage,
             window_surface::WindowSurfacePackage,
             InitializationStage, Package,
@@ -30,7 +29,6 @@ use crate::{
         schedules::{EarlyUpdate, Exit, Init, Render, SentWindowEvent, Update, WindowInit},
         systems,
     },
-    rendering::{index, vertex::Vertex},
     utils::bevy::{ScheduleExtensions as _, WorldExtensions},
 };
 
@@ -64,35 +62,6 @@ impl Application {
         // Add the basic "base" packages.
         app.add_package(RenderInitPackage);
         app.add_package(TimePackage);
-
-        // TEMPORARY
-        // Spawn the hello quad.
-        app.spawn((
-            RenderDescriptor::new("voxel".to_owned()),
-            Geometry::new(
-                &app.get_resource::<RenderContext>().unwrap().device,
-                &[
-                    Vertex {
-                        position: [-0.5, -0.5, 0.0],
-                        color: [0.0, 1.0, 0.0],
-                    },
-                    Vertex {
-                        position: [0.5, -0.5, 0.0],
-                        color: [0.0, 0.0, 1.0],
-                    },
-                    Vertex {
-                        position: [0.5, 0.5, 0.0],
-                        color: [0.0, 1.0, 0.0],
-                    },
-                    Vertex {
-                        position: [-0.5, 0.5, 0.0],
-                        color: [1.0, 0.0, 0.0],
-                    },
-                ],
-                &[0 as index::Index, 2, 1, 0, 3, 2],
-                index::INDEX_FORMAT,
-            ),
-        ));
 
         Ok(app)
     }

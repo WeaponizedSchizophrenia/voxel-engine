@@ -1,7 +1,6 @@
 use application::Application;
 use ecs::packages::{
-    camera_controller::CameraControllerPackage, config::ConfigPackage, generator::GeneratorPackage,
-    input_provider::InputProviderPackage, pipeline_server::PipelineServerPackage,
+    camera_controller::CameraControllerPackage, chunk::ChunkPackage, config::ConfigPackage, generator::GeneratorPackage, input_provider::InputProviderPackage, pipeline_server::PipelineServerPackage
 };
 use winit::event_loop::{ControlFlow, EventLoop};
 
@@ -28,7 +27,8 @@ fn main() -> anyhow::Result<()> {
         .with_package(PipelineServerPackage)
         .with_package(InputProviderPackage)
         .with_package(CameraControllerPackage)
-        .with_package(GeneratorPackage);
+        .with_package(GeneratorPackage)
+        .with_package(ChunkPackage);
     event_loop.run_app(&mut app)?;
 
     Ok(())

@@ -1,0 +1,7 @@
+use wgpu::{Sampler, TextureView};
+
+pub struct Texture {
+    pub texture: wgpu::Texture,
+    pub view: TextureView,
+    pub sampler: Sampler,
+}

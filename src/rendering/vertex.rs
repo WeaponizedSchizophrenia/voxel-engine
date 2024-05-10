@@ -10,8 +10,10 @@ use wgpu::{BufferAddress, VertexBufferLayout, VertexStepMode};
 pub struct Vertex {
     /// The position of the vertex in local space.
     pub position: [f32; 3],
-    /// The color of the vertex.
-    pub color: [f32; 3],
+    /// The texture coordinates of the vertex.
+    pub tex_coords: [f32; 2],
+    /// The normal of the vertex.
+    pub normal: [f32; 3],
 }
 
 impl Vertex {
@@ -26,7 +28,7 @@ impl Vertex {
 }
 
 /// The number of vertex attributes.
-pub const VERTEX_ATTRIBUTE_COUNT: usize = 2;
+pub const VERTEX_ATTRIBUTE_COUNT: usize = 3;
 /// The vertex attributes.
 pub const VERTEX_ATTRIBUTES: [wgpu::VertexAttribute; VERTEX_ATTRIBUTE_COUNT] =
-    wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3];
+    wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2, 2 => Float32x3];

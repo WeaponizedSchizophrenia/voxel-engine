@@ -8,6 +8,7 @@ pub mod pipeline_server;
 pub mod render_init;
 pub mod time;
 pub mod window_surface;
+pub mod chunk;
 
 /// The initialization stage of a package.
 pub enum InitializationStage {
