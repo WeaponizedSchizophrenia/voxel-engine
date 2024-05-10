@@ -22,9 +22,11 @@ use crate::{
             window_events::{self, KeyboardInput, MouseButtonInput, MouseMoved},
             WindowRenderRequested, WindowResized,
         },
-        packages::{window_surface::WindowSurfacePackage, InitializationStage, Package},
+        packages::{
+            time::TimePackage, window_surface::WindowSurfacePackage, InitializationStage, Package,
+        },
         resources::{Generator, GpuInstance, RenderContext},
-        schedules::{Exit, Init, Render, SentWindowEvent, Update, WindowInit},
+        schedules::{EarlyUpdate, Exit, Init, Render, SentWindowEvent, Update, WindowInit},
         systems,
     },
     rendering::{index, vertex::Vertex},
@@ -42,8 +44,10 @@ impl Application {
     pub async fn new() -> anyhow::Result<Self> {
         let mut world = World::default();
 
+        // Todo: Removes the systems from the schedule declarations.
         world.add_schedule(Schedule::new(Init));
         world.add_schedule(Schedule::new(WindowInit).with_systems(systems::init_camera_system));
+        world.add_schedule(Schedule::new(EarlyUpdate));
         world.add_schedule(Schedule::new(Update).with_systems(systems::generate_chunk_data));
         world.add_schedule(Schedule::new(Render).with_systems((systems::render_system,)));
         world.add_schedule(Schedule::new(Exit));
@@ -53,9 +57,11 @@ impl Application {
             systems::keyboard_input_system,
         )));
 
+        // TODO: Move the gpu instance and render context into a package.
         let gpu_instance = GpuInstance::new().await?;
         let render_context = RenderContext::new(&gpu_instance).await?;
 
+        // TEMPORARY
         // Spawn the hello quad.
         world.spawn((
             RenderDescriptor::new("voxel".to_owned()),
@@ -87,19 +93,27 @@ impl Application {
         world.insert_resource(gpu_instance);
         world.insert_resource(render_context);
 
+        // TODO: Move the generator into a package.
         world.insert_resource(Generator::new());
+
         window_events::register_window_events(&mut world);
 
+        // TEMPORARY
         for x in -4..5 {
             for z in -4..5 {
                 world.spawn(Chunk::new(vector![x, z]));
             }
         }
 
-        Ok(Self {
+        let mut app = Self {
             world,
             window_init_packages: VecDeque::new(),
-        })
+        };
+
+        // Add the basic "base" packages.
+        app.add_package(TimePackage);
+
+        Ok(app)
     }
 
     /// Gets the specified `Resource`. If it does not exist returns None.
@@ -194,6 +208,7 @@ impl Application {
             _ => {}
         }
 
+        self.world.run_schedule(EarlyUpdate);
         self.world.run_schedule(Update);
     }
 }

@@ -18,6 +18,7 @@ pub use self::component::{CameraController, CurrentCameraController};
 
 use super::{
     input_provider::{self, InputProvider},
+    time::Time,
     window_surface::Window,
     Package,
 };
@@ -84,6 +85,7 @@ pub fn mouse_motion_listener_system(
 
 pub fn update_system(
     mut camera_controllers: Query<&mut CameraController>,
+    time: Res<Time>,
     input_provider: Res<InputProvider>,
 ) {
     let input_vector = vector![
@@ -115,10 +117,11 @@ pub fn update_system(
     }
 
     let input_vector = input_vector.normalize();
+    let delta_time = time.get_delta_time().get_seconds();
 
     for mut controller in camera_controllers.iter_mut() {
         let speed = controller.speed;
-        controller.position += input_vector * speed;
+        controller.position += input_vector * speed * delta_time;
     }
 }
 

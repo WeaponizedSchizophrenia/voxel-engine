@@ -8,6 +8,10 @@ pub struct Init;
 #[derive(ScheduleLabel, Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct WindowInit;
 
+/// Gets called every event loop iteration before `Update`.
+#[derive(ScheduleLabel, Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct EarlyUpdate;
+
 /// Gets called every event loop iteration.
 #[derive(ScheduleLabel, Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Update;
