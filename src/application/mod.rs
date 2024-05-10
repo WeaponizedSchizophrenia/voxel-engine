@@ -21,10 +21,8 @@ use crate::{
             WindowRenderRequested, WindowResized,
         },
         packages::{
-            render_init::RenderInitPackage,
-            time::TimePackage,
-            window_surface::WindowSurfacePackage,
-            InitializationStage, Package,
+            render_init::RenderInitPackage, time::TimePackage,
+            window_surface::WindowSurfacePackage, InitializationStage, Package,
         },
         schedules::{EarlyUpdate, Exit, Init, Render, SentWindowEvent, Update, WindowInit},
         systems,

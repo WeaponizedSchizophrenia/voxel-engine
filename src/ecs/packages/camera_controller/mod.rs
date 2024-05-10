@@ -17,7 +17,12 @@ use crate::ecs::{
 pub use self::component::{CameraController, CurrentCameraController};
 
 use super::{
-    config::Config, input_provider::{self, InputProvider}, render_init::RenderContext, time::Time, window_surface::Window, Package
+    config::Config,
+    input_provider::{self, InputProvider},
+    render_init::RenderContext,
+    time::Time,
+    window_surface::Window,
+    Package,
 };
 
 mod component;

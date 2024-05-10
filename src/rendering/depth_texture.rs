@@ -1,4 +1,7 @@
-use wgpu::{AddressMode, CompareFunction, Device, Extent3d, FilterMode, SamplerDescriptor, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages};
+use wgpu::{
+    AddressMode, CompareFunction, Device, Extent3d, FilterMode, SamplerDescriptor,
+    TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
+};
 
 use super::texture::Texture;
 
@@ -36,5 +39,9 @@ pub fn create_depth_texture(device: &Device, width: u32, height: u32) -> Texture
         ..Default::default()
     });
 
-    Texture { texture, view, sampler }
+    Texture {
+        texture,
+        view,
+        sampler,
+    }
 }

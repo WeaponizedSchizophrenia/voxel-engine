@@ -1,8 +1,12 @@
 use std::collections::HashMap;
 
+use crate::{
+    common::{self, chunk::BinaryVoxelContainer, face_dir::FaceDir, Voxel},
+    ecs::packages::render_init::RenderContext,
+    rendering::{index, vertex::Vertex},
+};
 use bevy_ecs::component::Component;
 use nalgebra::Vector2;
-use crate::{common::{self, chunk::BinaryVoxelContainer, face_dir::FaceDir, Voxel}, ecs::packages::render_init::RenderContext, rendering::{index, vertex::Vertex}};
 
 pub use crate::common::chunk::CHUNK_LENGTH;
 
@@ -43,6 +47,7 @@ impl Chunk {
     /// ## Returns
     /// The outter option indicates whether the index is out of bounds or not.
     /// The inner option indicates if the voxel is present or not.
+    #[allow(unused)]
     pub fn sample_mut<V3: Into<(usize, usize, usize)>>(
         &mut self,
         position: V3,
@@ -59,13 +64,14 @@ impl Chunk {
         self.index
     }
 
-    pub fn build_mesh_new(&self, render_context: &RenderContext) -> HashMap<Voxel, Geometry> {
+    pub fn build_mesh(&self, render_context: &RenderContext) -> HashMap<Voxel, Geometry> {
         let mut meshes: HashMap<Voxel, (Vec<Vertex>, Vec<u16>)> = HashMap::default();
 
         const ONE: BinaryVoxelContainer = 1;
 
         let mut axis_cols = [[[BinaryVoxelContainer::default(); CHUNK_LENGTH]; CHUNK_LENGTH]; 3];
-        let mut col_face_masks = [[[BinaryVoxelContainer::default(); CHUNK_LENGTH]; CHUNK_LENGTH]; 6];
+        let mut col_face_masks =
+            [[[BinaryVoxelContainer::default(); CHUNK_LENGTH]; CHUNK_LENGTH]; 6];
 
         let mut add_voxel_to_axis_cols = |x: usize, y: usize, z: usize| {
             axis_cols[0][z][x] |= ONE << y as BinaryVoxelContainer;
@@ -120,9 +126,9 @@ impl Chunk {
                         };
 
                         if let Some(voxel) = self.sample(voxel_pos).unwrap() {
-                            data[axis].entry(voxel.clone())
-                                .or_insert([[BinaryVoxelContainer::default(); CHUNK_LENGTH]; CHUNK_LENGTH])
-                                [y][x] |= ONE << z;
+                            data[axis].entry(*voxel).or_insert(
+                                [[BinaryVoxelContainer::default(); CHUNK_LENGTH]; CHUNK_LENGTH],
+                            )[y][x] |= ONE << z;
                         }
                     }
                 }
@@ -133,12 +139,16 @@ impl Chunk {
             let face_dir = FaceDir::from_axis(axis);
 
             for (voxel, mut slices) in voxels.into_iter() {
-                let voxel_geometry = meshes.entry(voxel)
-                    .or_insert((vec![], vec![]));
+                let voxel_geometry = meshes.entry(voxel).or_insert((vec![], vec![]));
 
                 for (axis_pos, slice) in slices.iter_mut().enumerate() {
                     common::chunk::mesh_slice(slice).into_iter().for_each(|q| {
-                        q.append_to_vertices(&mut voxel_geometry.0, &mut voxel_geometry.1, face_dir, axis_pos as i32)
+                        q.append_to_vertices(
+                            &mut voxel_geometry.0,
+                            &mut voxel_geometry.1,
+                            face_dir,
+                            axis_pos as i32,
+                        )
                     });
                 }
             }
@@ -152,8 +162,8 @@ impl Chunk {
                         &render_context.device,
                         &vertices,
                         &indices,
-                        index::INDEX_FORMAT
-                    )
+                        index::INDEX_FORMAT,
+                    ),
                 )
             })
             .collect()

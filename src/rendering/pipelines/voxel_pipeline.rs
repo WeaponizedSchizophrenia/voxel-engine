@@ -1,8 +1,14 @@
 use wgpu::{
-    BindGroupLayout, ColorTargetState, ColorWrites, DepthStencilState, Device, FragmentState, FrontFace, MultisampleState, PipelineCompilationOptions, PipelineLayoutDescriptor, PolygonMode, PrimitiveState, PrimitiveTopology, RenderPass, RenderPipeline, RenderPipelineDescriptor, ShaderModuleDescriptor, ShaderSource, TextureFormat, VertexState
+    BindGroupLayout, ColorTargetState, ColorWrites, DepthStencilState, Device, FragmentState,
+    FrontFace, MultisampleState, PipelineCompilationOptions, PipelineLayoutDescriptor, PolygonMode,
+    PrimitiveState, PrimitiveTopology, RenderPass, RenderPipeline, RenderPipelineDescriptor,
+    ShaderModuleDescriptor, ShaderSource, TextureFormat, VertexState,
 };
 
-use crate::{ecs::resources::camera, rendering::{depth_texture, vertex::Vertex}};
+use crate::{
+    ecs::resources::camera,
+    rendering::{depth_texture, vertex::Vertex},
+};
 
 /// A pipeline for rendering voxels.
 pub struct VoxelPipeline {

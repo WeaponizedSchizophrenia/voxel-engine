@@ -5,7 +5,10 @@ use wgpu::{
     TextureUsages, TextureView,
 };
 
-use crate::{ecs::packages::render_init::{GpuInstance, RenderContext}, rendering::{depth_texture, texture::Texture}};
+use crate::{
+    ecs::packages::render_init::{GpuInstance, RenderContext},
+    rendering::{depth_texture, texture::Texture},
+};
 
 use super::window::Window;
 
@@ -80,7 +83,11 @@ impl WindowRenderSurface {
 
         surface.configure(&context.device, &surface_config);
 
-        let depth_texture = depth_texture::create_depth_texture(&context.device, surface_config.width, surface_config.height);
+        let depth_texture = depth_texture::create_depth_texture(
+            &context.device,
+            surface_config.width,
+            surface_config.height,
+        );
 
         Ok(Self {
             surface,
@@ -96,7 +103,11 @@ impl WindowRenderSurface {
         self.surface
             .configure(&context.device, &self.surface_config);
 
-        self.depth_texture = depth_texture::create_depth_texture(&context.device, self.surface_config.width, self.surface_config.height);
+        self.depth_texture = depth_texture::create_depth_texture(
+            &context.device,
+            self.surface_config.width,
+            self.surface_config.height,
+        );
     }
 
     /// Returns the surface's current texture.

@@ -2,7 +2,7 @@ use nalgebra::Vector2;
 
 use crate::rendering::{index::Index, vertex::Vertex};
 
-use super::{chunk::BinaryVoxelContainer, face_dir::FaceDir};
+use super::face_dir::FaceDir;
 
 /// Represents a quad in 2d space.
 pub struct Quad {

@@ -1,6 +1,7 @@
 use bevy_ecs::system::{Query, Res};
 use wgpu::{
-    Color, CommandEncoderDescriptor, LoadOp, Operations, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, StoreOp
+    Color, CommandEncoderDescriptor, LoadOp, Operations, RenderPassColorAttachment,
+    RenderPassDepthStencilAttachment, RenderPassDescriptor, StoreOp,
 };
 
 use crate::{
