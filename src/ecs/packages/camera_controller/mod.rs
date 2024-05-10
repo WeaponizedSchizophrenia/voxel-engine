@@ -4,7 +4,7 @@ use bevy_ecs::{
     schedule::IntoSystemConfigs as _,
     system::{Query, Res},
 };
-use nalgebra::{point, vector, Vector3};
+use nalgebra::{point, vector, Matrix3, Vector3};
 use winit::{event::MouseButton, keyboard::KeyCode};
 
 use crate::ecs::{
@@ -115,9 +115,9 @@ fn update_system(
         } else {
             0.0
         },
-        if input_provider.is_pressed(KeyCode::KeyS) {
+        if input_provider.is_pressed(KeyCode::KeyW) {
             1.0
-        } else if input_provider.is_pressed(KeyCode::KeyW) {
+        } else if input_provider.is_pressed(KeyCode::KeyS) {
             -1.0
         } else {
             0.0
@@ -131,9 +131,18 @@ fn update_system(
     let input_vector = input_vector.normalize();
     let delta_time = time.get_delta_time().get_seconds();
 
+    
     for mut controller in camera_controllers.iter_mut() {
+        let direction = controller.get_direction();
+        let relative_matrix = Matrix3::from_columns(
+            &[
+                direction.cross(&Vector3::y_axis()),
+                *Vector3::y_axis(),
+                *direction,
+            ]
+        );
         let speed = controller.speed;
-        controller.position += input_vector * speed * delta_time;
+        controller.position += relative_matrix * input_vector * speed * delta_time;
     }
 }
 
