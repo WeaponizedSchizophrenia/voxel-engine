@@ -3,7 +3,7 @@ use crate::{
     ecs::{components::Chunk, schedules::Update},
 };
 
-use super::Package;
+use super::{config::Config, Package};
 
 mod resource;
 use bevy_ecs::{
@@ -17,7 +17,14 @@ pub struct GeneratorPackage;
 
 impl Package for GeneratorPackage {
     fn initialize(&mut self, app: &mut crate::application::Application) {
-        app.insert_resource(Generator::new());
+        let config = match app.get_resource::<Config>() {
+            Some(cfg) => cfg,
+            None => {
+                log::error!("Failed to get config");
+                return;
+            },
+        };
+        app.insert_resource(Generator::new(config.seed, config.noise_frequency));
         app.add_systems(Update, generate_chunk_data);
     }
 }

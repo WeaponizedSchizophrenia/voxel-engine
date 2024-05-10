@@ -9,10 +9,11 @@ pub struct Generator {
 
 impl Generator {
     /// Creates a new generator.
-    pub fn new() -> Self {
+    pub fn new(seed: u64, freq: f32) -> Self {
         let mut noise = FastNoise::new();
 
-        noise.set_frequency(0.04);
+        noise.set_frequency(freq);
+        noise.set_seed(seed);
         noise.set_noise_type(NoiseType::Perlin);
 
         Self { noise }

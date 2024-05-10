@@ -39,7 +39,11 @@ struct FragmentOutput {
 fn voxel_fragment(in: VertexOutput) -> FragmentOutput {
     var out: FragmentOutput;
 
-    out.color = vec4<f32>(in.normal, 1.0);
+    out.color = vec4<f32>(modulo(in.tex_coords.x, 1.0), modulo(in.tex_coords.y, 1.0), 1.0, 1.0);
 
     return out;
+}
+
+fn modulo(x: f32, y: f32) -> f32 {
+    return x - y * floor(x / y);
 }

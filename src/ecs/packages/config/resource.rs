@@ -7,6 +7,8 @@ pub struct Config {
     /// The color that the background should be cleared to.
     pub clearing_color: (f32, f32, f32, f32),
     pub sensitivity: f32,
+    pub seed: u64,
+    pub noise_frequency: f32,
 }
 
 impl Default for Config {
@@ -14,6 +16,8 @@ impl Default for Config {
         Self {
             clearing_color: (1.0, 1.0, 1.0, 1.0),
             sensitivity: 0.005,
+            seed: 0,
+            noise_frequency: 0.04,
         }
     }
 }
