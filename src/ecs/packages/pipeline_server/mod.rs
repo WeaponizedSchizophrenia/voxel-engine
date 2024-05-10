@@ -8,7 +8,7 @@ use crate::{
 
 use super::{render_init::RenderContext, Package};
 
-/// Package for the pipeline server.
+/// Package for `PipelineServer`.
 pub struct PipelineServerPackage;
 
 impl Package for PipelineServerPackage {

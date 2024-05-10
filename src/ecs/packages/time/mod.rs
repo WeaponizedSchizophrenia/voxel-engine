@@ -8,6 +8,7 @@ mod resource;
 use bevy_ecs::system::ResMut;
 pub use resource::{DeltaTime, Time};
 
+/// Package for `Time`.
 pub struct TimePackage;
 
 impl Package for TimePackage {
@@ -23,6 +24,7 @@ impl Package for TimePackage {
     }
 }
 
+/// Updates the `Time` resource.
 pub fn update_time_system(mut time: ResMut<Time>) {
     let frame_start = Instant::now();
     let delta_time = frame_start - time.last_frame_start;

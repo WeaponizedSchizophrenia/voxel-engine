@@ -15,6 +15,7 @@ pub struct Chunk {
 
 impl Chunk {
     /// Creates a new chunk with the specified index.
+    #[allow(unused)]
     pub fn new<V2: Into<Vector2<i32>>>(index: V2) -> Self {
         Self {
             voxels: vec![None; CHUNK_LENGTH * CHUNK_LENGTH * CHUNK_LENGTH],
@@ -49,6 +50,7 @@ impl Chunk {
         )
     }
 
+    /// Returns the index of the chunk.
     #[allow(unused)]
     pub fn get_index(&self) -> Vector2<i32> {
         self.index

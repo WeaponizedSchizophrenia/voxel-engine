@@ -12,6 +12,7 @@ use bevy_ecs::{
 };
 pub use resource::Generator;
 
+/// Package for `Generator`.
 pub struct GeneratorPackage;
 
 impl Package for GeneratorPackage {

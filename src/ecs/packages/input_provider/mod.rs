@@ -13,6 +13,7 @@ use crate::ecs::{
 
 use super::Package;
 
+/// Package for `InputProvider`.
 pub struct InputProviderPackage;
 
 impl Package for InputProviderPackage {
@@ -21,7 +22,7 @@ impl Package for InputProviderPackage {
         app.add_systems(
             Update,
             (
-                mouse_motion_listener_system,
+                mouse_moved_listener_system,
                 keyboard_listener_system,
                 mouse_button_listener_system,
             ),
@@ -29,7 +30,8 @@ impl Package for InputProviderPackage {
     }
 }
 
-pub fn mouse_motion_listener_system(
+/// Listens for mouse moved events and converts them to mouse motion events.
+pub fn mouse_moved_listener_system(
     mut events: EventReader<MouseMoved>,
     mut event_writer: EventWriter<MouseMotion>,
     mut input_provider: ResMut<InputProvider>,
@@ -42,6 +44,7 @@ pub fn mouse_motion_listener_system(
     }
 }
 
+/// Listens for keyboard events and updates the internal `InputProvider` state accordingly.
 pub fn keyboard_listener_system(
     mut events: EventReader<KeyboardInput>,
     mut input_provider: ResMut<InputProvider>,
@@ -56,6 +59,7 @@ pub fn keyboard_listener_system(
     }
 }
 
+/// Listens for mouse button events and updates the internal `InputProvider` state accordingly.
 pub fn mouse_button_listener_system(
     mut events: EventReader<MouseButtonInput>,
     mut input_provider: ResMut<InputProvider>,

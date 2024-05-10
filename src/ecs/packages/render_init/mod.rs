@@ -6,6 +6,7 @@ mod render_context;
 use pollster::FutureExt;
 pub use render_context::RenderContext;
 
+/// Package for initializing `GpuInstance` and `RenderContext`.
 pub struct RenderInitPackage;
 
 impl Package for RenderInitPackage {

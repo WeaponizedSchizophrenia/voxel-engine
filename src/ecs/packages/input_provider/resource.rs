@@ -3,6 +3,7 @@ use bitvec::{array::BitArray, BitArr};
 use nalgebra::Vector2;
 use winit::{event::MouseButton, keyboard::KeyCode};
 
+/// Handles the input for the application and provides useful methods for systems.
 #[derive(Resource, Debug)]
 pub struct InputProvider {
     pub(super) last_mouse_pos: Vector2<f32>,

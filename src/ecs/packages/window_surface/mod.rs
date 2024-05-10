@@ -24,7 +24,7 @@ use crate::{
 
 use super::Package;
 
-/// Package for initializing a window and it's surface.
+/// Package for initializing a `Window` and it's `WindowRenderSurface`.
 pub struct WindowSurfacePackage {
     /// Even though this is a `Option`, it is always `Some`,
     /// because creating this struct from outside this module is only available with `WindowSurfacePackage::new()`.

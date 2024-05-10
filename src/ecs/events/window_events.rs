@@ -37,7 +37,9 @@ pub struct WindowRenderRequested;
 /// Keyboard input recieved for the window.
 #[derive(Event, Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct KeyboardInput {
+    /// The state of the input.
     pub state: ElementState,
+    /// The button that was pressed or released.
     pub key: PhysicalKey,
 }
 
@@ -53,12 +55,14 @@ impl From<KeyEvent> for KeyboardInput {
 /// Mouse moved in the window, provides the delta.
 #[derive(Event, Clone, Copy, PartialEq, Debug)]
 pub struct MouseMotion {
+    /// The difference of the mouse position since the last frame.
     pub delta: Vector2<f32>,
 }
 
 /// Mouse moved in the window, provides the position.
 #[derive(Event, Clone, Copy, PartialEq, Debug)]
 pub struct MouseMoved {
+    // The new position of the mouse.
     pub new_position: Vector2<f32>,
 }
 
@@ -73,7 +77,9 @@ impl From<PhysicalPosition<f64>> for MouseMoved {
 /// A mouse button input event has been recieved for the window.
 #[derive(Event, Clone, Copy, PartialEq, Debug)]
 pub struct MouseButtonInput {
+    /// The state of the input.
     pub state: ElementState,
+    /// The button that was pressed or released.
     pub button: MouseButton,
 }
 

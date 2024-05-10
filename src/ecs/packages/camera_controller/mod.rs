@@ -26,7 +26,7 @@ use super::{
 
 mod component;
 
-/// Package for the camera controller.
+/// Package for `CameraController`.
 pub struct CameraControllerPackage;
 
 impl Package for CameraControllerPackage {
@@ -51,7 +51,7 @@ impl Package for CameraControllerPackage {
             (
                 update_system,
                 resize_listener_system,
-                mouse_motion_listener_system.after(input_provider::mouse_motion_listener_system),
+                mouse_motion_listener_system.after(input_provider::mouse_moved_listener_system),
             ),
         );
         // app.add_systems(Update, update_system);
@@ -65,7 +65,8 @@ impl Package for CameraControllerPackage {
     }
 }
 
-pub fn mouse_motion_listener_system(
+/// Listens for mouse motion events and updates the camera controller accordingly.
+fn mouse_motion_listener_system(
     mut events: EventReader<MouseMotion>,
     mut camera_controllers: Query<&mut CameraController>,
     input_provider: Res<InputProvider>,
@@ -84,7 +85,8 @@ pub fn mouse_motion_listener_system(
     }
 }
 
-pub fn update_system(
+/// Updates the camera controller by moving it based on keyboard input.
+fn update_system(
     mut camera_controllers: Query<&mut CameraController>,
     time: Res<Time>,
     input_provider: Res<InputProvider>,
@@ -126,6 +128,7 @@ pub fn update_system(
     }
 }
 
+/// Listens for window resize events and updates the aspect ratio of the camera controller.
 fn resize_listener_system(
     mut events: EventReader<WindowResized>,
     mut camera_controllers: Query<&mut CameraController>,
@@ -137,6 +140,7 @@ fn resize_listener_system(
     }
 }
 
+/// Updates the camera with the camera controller that is marked with `CurrentCameraController`.
 pub fn update_camera_system(
     query: Query<&CameraController, (With<CurrentCameraController>, Changed<CameraController>)>,
     render_context: Res<RenderContext>,
