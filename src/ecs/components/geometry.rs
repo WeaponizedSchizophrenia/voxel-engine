@@ -18,6 +18,7 @@ pub struct Geometry {
 
 impl Geometry {
     /// Creates a new `Geometry` from the specified vertices and indices.
+    #[allow(unused)]
     pub fn new<V, I>(
         device: &Device,
         vertices: &[V],
