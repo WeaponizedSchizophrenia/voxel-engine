@@ -11,7 +11,7 @@ use crate::{
     rendering::{index, instance::Instance, vertex::Vertex},
 };
 use bevy_ecs::component::Component;
-use nalgebra::{vector, Matrix4, Vector2};
+use nalgebra::{Matrix4, Vector3};
 
 pub use crate::common::chunk::CHUNK_LENGTH;
 
@@ -22,13 +22,13 @@ use super::Geometry;
 pub struct Chunk {
     pub voxels: Vec<Option<Voxel>>,
     #[allow(unused)]
-    index: Vector2<i32>,
+    index: Vector3<i32>,
 }
 
 impl Chunk {
     /// Creates a new chunk with the specified index.
     #[allow(unused)]
-    pub fn new<V2: Into<Vector2<i32>>>(index: V2) -> Self {
+    pub fn new<V2: Into<Vector3<i32>>>(index: V2) -> Self {
         Self {
             voxels: vec![None; CHUNK_LENGTH * CHUNK_LENGTH * CHUNK_LENGTH],
             index: index.into(),
@@ -87,7 +87,7 @@ impl Chunk {
 
     /// Returns the index of the chunk.
     #[allow(unused)]
-    pub fn get_index(&self) -> Vector2<i32> {
+    pub fn get_index(&self) -> Vector3<i32> {
         self.index
     }
 
@@ -191,11 +191,8 @@ impl Chunk {
                         &render_context.device,
                         &vertices,
                         &[Instance {
-                            model_matrix: Matrix4::new_translation(&vector![
-                                self.index.x as f32 * chunk::CHUNK_LENGTH as f32,
-                                0.0,
-                                self.index.y as f32 * chunk::CHUNK_LENGTH as f32
-                            ])
+                            model_matrix: Matrix4::new_translation(&self.index
+                                .map(|c| c as f32 * chunk::CHUNK_LENGTH as f32))
                             .into(),
                         }],
                         &indices,

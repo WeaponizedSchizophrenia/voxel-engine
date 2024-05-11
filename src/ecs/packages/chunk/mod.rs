@@ -4,7 +4,7 @@ use bevy_ecs::{
     schedule::IntoSystemConfigs as _,
     system::{ParallelCommands, Query, Res},
 };
-use nalgebra::Vector2;
+use nalgebra::Vector3;
 
 use crate::ecs::{
     components::{Chunk, RenderDescriptor},
@@ -17,13 +17,13 @@ pub struct ChunkPackage;
 
 impl Package for ChunkPackage {
     fn initialize(&mut self, app: &mut crate::application::Application) {
-        for x in -15..16 {
-            for z in -15..16 {
-                app.spawn(Chunk::new(Vector2::new(x, z)));
+        for x in -2..3 {
+            for y in -1..1 {
+                for z in -2..3 {
+                    app.spawn(Chunk::new(Vector3::new(x, y, z)));
+                }
             }
         }
-
-        app.spawn(Chunk::new(Vector2::zeros()));
 
         app.add_systems(
             Update,

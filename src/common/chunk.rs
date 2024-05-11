@@ -8,8 +8,10 @@ use super::quad::Quad;
 pub type BinaryVoxelContainer = u64;
 /// The chunk side length.
 pub const CHUNK_LENGTH: usize = mem::size_of::<BinaryVoxelContainer>() * 8;
+/// The chunk side length as an i32.
+pub const CHUNK_LENGTHI32: i32 = CHUNK_LENGTH as i32;
 /// The chunk side length as a u32.
-pub const CHUNK_LENGTH32: u32 = CHUNK_LENGTH as u32;
+pub const CHUNK_LENGTHU32: u32 = CHUNK_LENGTH as u32;
 
 pub fn mesh_slice(slice: &mut [BinaryVoxelContainer; CHUNK_LENGTH]) -> Vec<Quad> {
     let mut output = vec![];
@@ -17,7 +19,7 @@ pub fn mesh_slice(slice: &mut [BinaryVoxelContainer; CHUNK_LENGTH]) -> Vec<Quad>
     let mut x = 0;
     while x < slice.len() {
         let start_y = slice[x].trailing_zeros();
-        if start_y >= CHUNK_LENGTH32 {
+        if start_y >= CHUNK_LENGTHU32 {
             x += 1;
             continue;
         }
