@@ -20,8 +20,8 @@ impl Generator {
     }
 
     /// Gets the height at the specified position.
-    pub fn get_height<V2: Into<(f32, f32)>>(&self, pos: V2) -> f32 {
+    pub fn get_height<V2: Into<[f32; 2]>>(&self, pos: V2) -> f32 {
         let pos = pos.into();
-        self.noise.get_noise(pos.0, pos.1)
+        self.noise.get_noise(pos[0], pos[1])
     }
 }

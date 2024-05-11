@@ -70,7 +70,6 @@ impl Chunk {
     }
 
     pub fn build_mesh(&self, render_context: &RenderContext) -> HashMap<Voxel, Geometry> {
-        log::info!("Building chunk mesh for chunk at: {:?}", self.index);
         let mut meshes: HashMap<Voxel, (Vec<Vertex>, Vec<u16>)> = HashMap::default();
 
         const ONE: BinaryVoxelContainer = 1;
@@ -160,7 +159,7 @@ impl Chunk {
             }
         }
 
-        IntoIterator::into_iter(meshes)
+        let out = IntoIterator::into_iter(meshes)
             .map(|(voxel, (vertices, indices))| {
                 (
                     voxel,
@@ -180,6 +179,8 @@ impl Chunk {
                     ),
                 )
             })
-            .collect()
+            .collect();
+
+        out
     }
 }

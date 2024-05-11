@@ -2,7 +2,7 @@ use bevy_ecs::{
     entity::Entity,
     query::Changed,
     schedule::IntoSystemConfigs as _,
-    system::{Commands, Query, Res},
+    system::{ParallelCommands, Query, Res},
 };
 use nalgebra::Vector2;
 
@@ -17,8 +17,8 @@ pub struct ChunkPackage;
 
 impl Package for ChunkPackage {
     fn initialize(&mut self, app: &mut crate::application::Application) {
-        for x in -5..6 {
-            for z in -5..6 {
+        for x in -6..7 {
+            for z in -6..7 {
                 app.spawn(Chunk::new(Vector2::new(x, z)));
             }
         }
@@ -33,16 +33,21 @@ impl Package for ChunkPackage {
 }
 
 pub fn chunk_mesher_system(
-    mut commands: Commands,
+    commands: ParallelCommands,
     chunks: Query<(Entity, &Chunk), Changed<Chunk>>,
     render_context: Res<RenderContext>,
 ) {
     let voxel_render_descriptor = RenderDescriptor::new("voxel".to_string());
-    for (entity, chunk) in chunks.iter() {
-        for (_voxel, mesh) in chunk.build_mesh(&render_context) {
-            commands
-                .entity(entity)
-                .insert((voxel_render_descriptor.clone(), mesh));
-        }
-    }
+
+    chunks.par_iter()
+        .for_each(|(entity, chunk)| {
+            for (_voxel, geometry) in chunk.build_mesh(&render_context) {
+                commands
+                    .command_scope(|mut commands| {
+                        commands
+                            .entity(entity)
+                            .insert((voxel_render_descriptor.clone(), geometry));
+                    })
+            }
+        });
 }
