@@ -35,25 +35,36 @@ impl Chunk {
         }
     }
 
-    /// Samples a reference to a voxel at the specified position.
+    /// Tries to sample a reference to a voxel at the specified position.
     ///
     /// ## Returns
     /// The outter option indicates whether the index is out of bounds or not.
     /// The inner option indicates if the voxel is present or not.
     #[allow(unused)]
-    pub fn sample<V3: Into<(usize, usize, usize)>>(&self, position: V3) -> Option<&Option<Voxel>> {
+    pub fn try_sample<V3: Into<(usize, usize, usize)>>(&self, position: V3) -> Option<&Option<Voxel>> {
         let position = position.into();
         self.voxels
             .get(position.0 + position.1 * CHUNK_LENGTH + position.2 * CHUNK_LENGTH * CHUNK_LENGTH)
     }
 
-    /// Samples a mutable reference to a voxel at the specified position.
+    /// Samples a reference to a voxel at the specified position.
+    /// 
+    /// ## Panics
+    /// If the position is out of bounds.
+    pub fn sample<V3: Into<(usize, usize, usize)>>(&self, position: V3) -> &Option<Voxel> {
+        let position = position.into();
+        &self.voxels[
+            position.0 + position.1 * CHUNK_LENGTH + position.2 * CHUNK_LENGTH * CHUNK_LENGTH
+        ]
+    }
+
+    /// Tries to sample a mutable reference to a voxel at the specified position.
     ///
     /// ## Returns
     /// The outter option indicates whether the index is out of bounds or not.
     /// The inner option indicates if the voxel is present or not.
     #[allow(unused)]
-    pub fn sample_mut<V3: Into<(usize, usize, usize)>>(
+    pub fn try_sample_mut<V3: Into<(usize, usize, usize)>>(
         &mut self,
         position: V3,
     ) -> Option<&mut Option<Voxel>> {
@@ -61,6 +72,17 @@ impl Chunk {
         self.voxels.get_mut(
             position.0 + position.1 * CHUNK_LENGTH + position.2 * CHUNK_LENGTH * CHUNK_LENGTH,
         )
+    }
+
+    /// Samples a mutable reference to a voxel at the specified position.
+    /// 
+    /// ## Panics
+    /// If the position is out of bounds.
+    pub fn sample_mut<V3: Into<(usize, usize, usize)>>(&mut self, position: V3) -> &mut Option<Voxel> {
+        let position = position.into();
+        &mut self.voxels[
+            position.0 + position.1 * CHUNK_LENGTH + position.2 * CHUNK_LENGTH * CHUNK_LENGTH
+        ]
     }
 
     /// Returns the index of the chunk.
@@ -87,7 +109,8 @@ impl Chunk {
         for z in 0..CHUNK_LENGTH {
             for y in 0..CHUNK_LENGTH {
                 for x in 0..CHUNK_LENGTH {
-                    if self.sample((x, y, z)).unwrap().is_some() {
+                    // Can sample this without bound checks because it can never exceed it.
+                    if self.sample((x, y, z)).is_some() {
                         add_voxel_to_axis_cols(x, y, z);
                     }
                 }
@@ -130,7 +153,8 @@ impl Chunk {
                             _ => (x, z, y),
                         };
 
-                        if let Some(voxel) = self.sample(voxel_pos).unwrap() {
+                        // Can sample this without bound checks because it can never exceed it.
+                        if let Some(voxel) = self.sample(voxel_pos) {
                             data[axis].entry(*voxel).or_insert(
                                 [[BinaryVoxelContainer::default(); CHUNK_LENGTH]; CHUNK_LENGTH],
                             )[y][x] |= ONE << z;

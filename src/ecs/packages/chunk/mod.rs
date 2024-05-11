@@ -17,8 +17,8 @@ pub struct ChunkPackage;
 
 impl Package for ChunkPackage {
     fn initialize(&mut self, app: &mut crate::application::Application) {
-        for x in -6..7 {
-            for z in -6..7 {
+        for x in -15..16 {
+            for z in -15..16 {
                 app.spawn(Chunk::new(Vector2::new(x, z)));
             }
         }
@@ -39,15 +39,13 @@ pub fn chunk_mesher_system(
 ) {
     let voxel_render_descriptor = RenderDescriptor::new("voxel".to_string());
 
-    chunks.par_iter()
-        .for_each(|(entity, chunk)| {
-            for (_voxel, geometry) in chunk.build_mesh(&render_context) {
+    chunks.par_iter().for_each(|(entity, chunk)| {
+        for (_voxel, geometry) in chunk.build_mesh(&render_context) {
+            commands.command_scope(|mut commands| {
                 commands
-                    .command_scope(|mut commands| {
-                        commands
-                            .entity(entity)
-                            .insert((voxel_render_descriptor.clone(), geometry));
-                    })
-            }
-        });
+                    .entity(entity)
+                    .insert((voxel_render_descriptor.clone(), geometry));
+            })
+        }
+    });
 }
