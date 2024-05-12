@@ -7,7 +7,7 @@ pub struct Config {
     /// The color that the background should be cleared to.
     pub clearing_color: (f32, f32, f32, f32),
     pub sensitivity: f32,
-    pub seed: u64,
+    pub seed: i32,
     pub noise_frequency: f32,
 }
 

@@ -17,17 +17,18 @@ pub struct ChunkPackage;
 
 impl Package for ChunkPackage {
     fn initialize(&mut self, app: &mut crate::application::Application) {
-        for x in -2..3 {
-            for y in -1..1 {
-                for z in -2..3 {
-                    app.spawn(Chunk::new(Vector3::new(x, y, z)));
-                }
-            }
-        }
+        // for x in -1..2 {
+        //     for y in -1..=1 {
+        //         for z in -1..2 {
+        //             app.spawn(Chunk::new(Vector3::new(x, y, z)));
+        //         }
+        //     }
+        // }
+        app.spawn(Chunk::new(Vector3::zeros()));
 
         app.add_systems(
             Update,
-            chunk_mesher_system.after(generator::generate_chunk_data),
+            chunk_mesher_system.after(generator::generate_chunk_data_2d),
         );
     }
 }

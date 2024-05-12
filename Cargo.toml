@@ -14,7 +14,7 @@ wgpu = { version = "0.20.0", default-features = false, features = [ "dx12", "wgs
 
 # Math
 nalgebra = "0.32.5"
-bracket-noise = "0.8.7"
+fastnoise-lite = "1.1.1"
 
 # Logging
 log = "0.4.21"
