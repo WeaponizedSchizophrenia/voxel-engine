@@ -1,0 +1,9 @@
+(
+    seed: 69,
+    frequency: 0.017,
+    noise_type: Perlin,
+    fractal_type: None,
+    rotation_type: ImproveXZPlanes,
+    height_mult: 7.6,
+    base_height: -1.0,
+)

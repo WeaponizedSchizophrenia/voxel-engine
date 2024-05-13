@@ -3,11 +3,14 @@ use std::time::Instant;
 use crate::{
     common::{chunk, Voxel},
     ecs::{components::Chunk, schedules::Update},
+    utils::file_system,
 };
 
-use super::{config::Config, Package};
+use super::Package;
 
 mod resource;
+mod terrain_options;
+
 use bevy_ecs::{
     query::Added,
     system::{Query, Res},
@@ -21,14 +24,22 @@ pub struct GeneratorPackage;
 
 impl Package for GeneratorPackage {
     fn initialize(&mut self, app: &mut crate::application::Application) {
-        let config = match app.get_resource::<Config>() {
-            Some(cfg) => cfg,
-            None => {
-                log::error!("Failed to get config");
+        let terrain_options = match file_system::read_asset_config("terrain_gen_options") {
+            Ok(options) => options,
+            Err(e) => {
+                log::error!("Failed to read terrain generation options: {}", e);
                 return;
             }
         };
-        app.insert_resource(Generator::new(config.seed, config.noise_frequency));
+        let terrain_options = match ron::de::from_str(&terrain_options) {
+            Ok(options) => options,
+            Err(e) => {
+                log::error!("Failed to deserialize terrain generation options: {}", e);
+                return;
+            }
+        };
+
+        app.insert_resource(Generator::new(terrain_options));
         app.add_systems(Update, generate_chunk_data_3d);
     }
 }

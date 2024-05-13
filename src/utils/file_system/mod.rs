@@ -16,6 +16,13 @@ pub fn read_config() -> io::Result<String> {
     read::read_text(CONFIG_PATH)
 }
 
+pub fn read_asset_config(name: &str) -> io::Result<String> {
+    let mut path = get_asset_dir();
+    path.push(name);
+    path.set_extension("ron");
+    read::read_text(path)
+}
+
 /// Writes the serialized config and returns the result.
 pub fn write_config(config: &str) -> io::Result<()> {
     write::write_text(CONFIG_PATH, config)
