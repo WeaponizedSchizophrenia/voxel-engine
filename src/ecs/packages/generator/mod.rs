@@ -10,6 +10,7 @@ use super::Package;
 
 mod resource;
 mod terrain_options;
+mod common;
 
 use bevy_ecs::{
     query::Added,

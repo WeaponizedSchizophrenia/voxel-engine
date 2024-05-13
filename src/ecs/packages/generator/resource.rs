@@ -18,7 +18,6 @@ impl Generator {
             noise.set_frequency(Some(terrain_options.frequency));
             noise.set_noise_type(Some(terrain_options.noise_type.into()));
             noise.set_fractal_type(Some(terrain_options.fractal_type.into()));
-            noise.set_rotation_type_3d(Some(terrain_options.rotation_type.into()));
             noise
         };
 
