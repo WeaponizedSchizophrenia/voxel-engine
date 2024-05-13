@@ -41,21 +41,24 @@ impl Chunk {
     /// The outter option indicates whether the index is out of bounds or not.
     /// The inner option indicates if the voxel is present or not.
     #[allow(unused)]
-    pub fn try_sample<V3: Into<(usize, usize, usize)>>(&self, position: V3) -> Option<&Option<Voxel>> {
+    pub fn try_sample<V3: Into<(usize, usize, usize)>>(
+        &self,
+        position: V3,
+    ) -> Option<&Option<Voxel>> {
         let position = position.into();
         self.voxels
             .get(position.0 + position.1 * CHUNK_LENGTH + position.2 * CHUNK_LENGTH * CHUNK_LENGTH)
     }
 
     /// Samples a reference to a voxel at the specified position.
-    /// 
+    ///
     /// ## Panics
     /// If the position is out of bounds.
+    #[allow(unused)]
     pub fn sample<V3: Into<(usize, usize, usize)>>(&self, position: V3) -> &Option<Voxel> {
         let position = position.into();
-        &self.voxels[
-            position.0 + position.1 * CHUNK_LENGTH + position.2 * CHUNK_LENGTH * CHUNK_LENGTH
-        ]
+        &self.voxels
+            [position.0 + position.1 * CHUNK_LENGTH + position.2 * CHUNK_LENGTH * CHUNK_LENGTH]
     }
 
     /// Tries to sample a mutable reference to a voxel at the specified position.
@@ -75,14 +78,17 @@ impl Chunk {
     }
 
     /// Samples a mutable reference to a voxel at the specified position.
-    /// 
+    ///
     /// ## Panics
     /// If the position is out of bounds.
-    pub fn sample_mut<V3: Into<(usize, usize, usize)>>(&mut self, position: V3) -> &mut Option<Voxel> {
+    #[allow(unused)]
+    pub fn sample_mut<V3: Into<(usize, usize, usize)>>(
+        &mut self,
+        position: V3,
+    ) -> &mut Option<Voxel> {
         let position = position.into();
-        &mut self.voxels[
-            position.0 + position.1 * CHUNK_LENGTH + position.2 * CHUNK_LENGTH * CHUNK_LENGTH
-        ]
+        &mut self.voxels
+            [position.0 + position.1 * CHUNK_LENGTH + position.2 * CHUNK_LENGTH * CHUNK_LENGTH]
     }
 
     /// Returns the index of the chunk.
@@ -183,7 +189,7 @@ impl Chunk {
             }
         }
 
-        let out = IntoIterator::into_iter(meshes)
+        IntoIterator::into_iter(meshes)
             .map(|(voxel, (vertices, indices))| {
                 (
                     voxel,
@@ -191,8 +197,9 @@ impl Chunk {
                         &render_context.device,
                         &vertices,
                         &[Instance {
-                            model_matrix: Matrix4::new_translation(&self.index
-                                .map(|c| c as f32 * chunk::CHUNK_LENGTH as f32))
+                            model_matrix: Matrix4::new_translation(
+                                &self.index.map(|c| c as f32 * chunk::CHUNK_LENGTH as f32),
+                            )
                             .into(),
                         }],
                         &indices,
@@ -200,8 +207,6 @@ impl Chunk {
                     ),
                 )
             })
-            .collect();
-
-        out
+            .collect()
     }
 }

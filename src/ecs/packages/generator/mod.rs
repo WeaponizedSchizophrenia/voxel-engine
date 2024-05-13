@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use crate::{
     common::{chunk, Voxel},
     ecs::{components::Chunk, schedules::Update},
@@ -10,7 +12,8 @@ use bevy_ecs::{
     query::Added,
     system::{Query, Res},
 };
-use nalgebra::vector;
+use nalgebra::{vector, Vector3};
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 pub use resource::Generator;
 
 /// Package for `Generator`.
@@ -31,43 +34,55 @@ impl Package for GeneratorPackage {
 }
 
 /// Generates chunk data.
-pub fn generate_chunk_data_3d(mut query: Query<&mut Chunk, Added<Chunk>>, generator: Res<Generator>) {
+pub fn generate_chunk_data_3d(
+    mut query: Query<&mut Chunk, Added<Chunk>>,
+    generator: Res<Generator>,
+) {
+    /// Converts the given local x, y and z coordinates of the chunk to world coordinates by using the chunk index to transform them.
+    fn get_world_pos(index: &Vector3<i32>, x: i32, y: i32, z: i32) -> Vector3<f32> {
+        (vector![x, y, z] + index * chunk::CHUNK_LENGTHI32).map(|c| c as f32)
+    }
+
+    if query.is_empty() {
+        return;
+    }
+
+    let start = Instant::now();
+
+    let generator = &generator;
     query.par_iter_mut().for_each(|mut chunk| {
-        (0..chunk::CHUNK_LENGTH).for_each(|x| {
-            (0..chunk::CHUNK_LENGTH).for_each(|y| {
-                (0..chunk::CHUNK_LENGTH).for_each(|z| {
-                    log::info!("Generating chunk at {x} {y} {z}");
-                    let index = chunk.get_index();
-                    let world_pos = vector![x as f32, y as f32, z as f32]
-                        + (index * chunk::CHUNK_LENGTHI32).map(|c| c as f32);
+        let index = chunk.get_index();
+        let height_map = &(0..chunk::CHUNK_LENGTHI32)
+            .into_par_iter()
+            .flat_map_iter(|x| {
+                (0..chunk::CHUNK_LENGTHI32).map(move |z| {
+                    // Only need x and z components so leave y as 0
+                    let world_pos = get_world_pos(&index, x, 0, z);
+                    generator.get_terrain_height(world_pos.xz())
+                })
+            })
+            .collect::<Vec<_>>();
 
-                    let voxel = generator.get_voxel(world_pos);
-                    *chunk.sample_mut((x, y, z)) = voxel;
-                });
-            });
-        });
+        chunk.voxels = (0..chunk::CHUNK_LENGTHI32)
+            .into_par_iter()
+            .flat_map(|x| {
+                (0..chunk::CHUNK_LENGTHI32)
+                    .into_par_iter()
+                    .flat_map_iter(move |y| {
+                        (0..chunk::CHUNK_LENGTHI32).map(move |z| {
+                            let world_pos = get_world_pos(&index, x, y, z);
+                            let height = height_map[(x + z * chunk::CHUNK_LENGTHI32) as usize];
+
+                            if height >= world_pos.y {
+                                Some(Voxel { id: 0 })
+                            } else {
+                                None
+                            }
+                        })
+                    })
+            })
+            .collect();
     });
-}
 
-/// Generates chunk data.
-#[allow(unused)]
-pub fn generate_chunk_data_2d(mut query: Query<&mut Chunk, Added<Chunk>>, generator: Res<Generator>) {
-    query.par_iter_mut().for_each(|mut chunk| {
-        (0..chunk::CHUNK_LENGTH).for_each(|x| {
-            (0..chunk::CHUNK_LENGTH).for_each(|z| {
-                let index = chunk.get_index();
-                let world_pos = vector![x as f32, z as f32]
-                    + (index.xz() * chunk::CHUNK_LENGTHI32).map(|c| c as f32);
-                let height = generator.get_height(world_pos);
-                let height = height * 0.5 * chunk::CHUNK_LENGTH as f32;
-                let height = height as i32;
-
-                let index_y = index.y * chunk::CHUNK_LENGTHI32;
-
-                for y in index_y..height.min(index_y + chunk::CHUNK_LENGTHI32) {
-                    *chunk.sample_mut((x, (y - index_y) as usize, z)) = Some(Voxel { id: 0 });
-                }
-            });
-        });
-    });
+    log::info!("Chunk generation took {} ms", start.elapsed().as_millis());
 }

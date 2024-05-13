@@ -5,4 +5,4 @@ clearing_color:
 - 1.0
 sensitivity: 0.005
 seed: 69
-noise_frequency: 0.01
+noise_frequency: 0.02

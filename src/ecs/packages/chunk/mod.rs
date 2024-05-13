@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use bevy_ecs::{
     entity::Entity,
     query::Changed,
@@ -17,18 +19,18 @@ pub struct ChunkPackage;
 
 impl Package for ChunkPackage {
     fn initialize(&mut self, app: &mut crate::application::Application) {
-        // for x in -1..2 {
-        //     for y in -1..=1 {
-        //         for z in -1..2 {
-        //             app.spawn(Chunk::new(Vector3::new(x, y, z)));
-        //         }
-        //     }
-        // }
-        app.spawn(Chunk::new(Vector3::zeros()));
+        for x in -2..=2 {
+            for y in -1..=1 {
+                for z in -2..=2 {
+                    app.spawn(Chunk::new(Vector3::new(x, y, z)));
+                }
+            }
+        }
+        // app.spawn(Chunk::new(Vector3::zeros()));
 
         app.add_systems(
             Update,
-            chunk_mesher_system.after(generator::generate_chunk_data_2d),
+            chunk_mesher_system.after(generator::generate_chunk_data_3d),
         );
     }
 }
@@ -38,7 +40,12 @@ pub fn chunk_mesher_system(
     chunks: Query<(Entity, &Chunk), Changed<Chunk>>,
     render_context: Res<RenderContext>,
 ) {
+    if chunks.is_empty() {
+        return;
+    }
+
     let voxel_render_descriptor = RenderDescriptor::new("voxel".to_string());
+    let start = Instant::now();
 
     chunks.par_iter().for_each(|(entity, chunk)| {
         for (_voxel, geometry) in chunk.build_mesh(&render_context) {
@@ -49,4 +56,6 @@ pub fn chunk_mesher_system(
             })
         }
     });
+
+    log::info!("Chunk meshing took {} ms", start.elapsed().as_millis());
 }
