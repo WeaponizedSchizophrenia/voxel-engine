@@ -8,9 +8,10 @@ use crate::{
 
 use super::Package;
 
+mod cave_options;
+mod common;
 mod resource;
 mod terrain_options;
-mod common;
 
 use bevy_ecs::{
     query::Added,
@@ -40,7 +41,22 @@ impl Package for GeneratorPackage {
             }
         };
 
-        app.insert_resource(Generator::new(terrain_options));
+        let cave_options = match file_system::read_asset_config("cave_gen_options") {
+            Ok(options) => options,
+            Err(e) => {
+                log::error!("Failed to read cave generation options: {}", e);
+                return;
+            }
+        };
+        let cave_options = match ron::de::from_str(&cave_options) {
+            Ok(options) => options,
+            Err(e) => {
+                log::error!("Failed to deserialize cave generation options: {}", e);
+                return;
+            }
+        };
+
+        app.insert_resource(Generator::new(terrain_options, cave_options));
         app.add_systems(Update, generate_chunk_data_3d);
     }
 }
@@ -85,7 +101,9 @@ pub fn generate_chunk_data_3d(
                             let world_pos = get_world_pos(&index, x, y, z);
                             let height = height_map[(x + z * chunk::CHUNK_LENGTHI32) as usize];
 
-                            if height >= world_pos.y {
+                            if height >= world_pos.y
+                                && generator.does_cave_contains_voxel(world_pos)
+                            {
                                 Some(Voxel { id: 0 })
                             } else {
                                 None

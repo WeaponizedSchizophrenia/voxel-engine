@@ -10,8 +10,6 @@ pub struct Config {
 
 impl Default for Config {
     fn default() -> Self {
-        Self {
-            sensitivity: 0.005,
-        }
+        Self { sensitivity: 0.005 }
     }
 }
