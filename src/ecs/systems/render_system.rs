@@ -9,7 +9,7 @@ use crate::{
         components::{Geometry, RenderDescriptor},
         packages::{
             pipeline_server::PipelineServer, render_init::RenderContext,
-            window_surface::WindowRenderSurface,
+            voxel_registry::VoxelRegistry, window_surface::WindowRenderSurface,
         },
         resources::Camera,
     },
@@ -22,6 +22,7 @@ pub fn render_system(
     pipeline_server: Res<PipelineServer>,
     context: Res<RenderContext>,
     camera: Res<Camera>,
+    voxel_textures: Res<VoxelRegistry>,
 ) {
     let output = render_surface.get_texture().unwrap();
     let output_view = output.texture.create_view(&Default::default());
@@ -55,6 +56,9 @@ pub fn render_system(
             occlusion_query_set: None,
         });
 
+        camera.bind_to_render_pass(&mut render_pass);
+        voxel_textures.bind_to_renderpass(&mut render_pass);
+
         for (desc, geometry) in render_query.iter() {
             let pipeline = match pipeline_server.get_pipeline(desc.get_pipeline_name()) {
                 Some(pipeline) => pipeline,
@@ -65,7 +69,6 @@ pub fn render_system(
             };
 
             pipeline.bind_to_render_pass(&mut render_pass);
-            camera.bind_to_render_pass(&mut render_pass);
 
             geometry.render_to_render_pass(&mut render_pass);
         }

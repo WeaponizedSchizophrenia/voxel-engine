@@ -1,7 +1,9 @@
 pub mod read;
 pub mod write;
 
-use std::{io, path::PathBuf};
+use std::{fs, io, path::PathBuf};
+
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 /// The relative path to the assets directory.
 pub const ASSETS_DIR: &str = "./assets";
@@ -16,11 +18,52 @@ pub fn read_config() -> io::Result<String> {
     read::read_text(CONFIG_PATH)
 }
 
-pub fn read_asset_config(name: &str) -> io::Result<String> {
+/// Reads the asset config and returns the result.
+pub fn read_asset_config(config_type: &str, name: &str) -> io::Result<String> {
     let mut path = get_asset_dir();
+    path.push("configs");
+    path.push(config_type);
     path.push(name);
     path.set_extension("ron");
     read::read_text(path)
+}
+
+pub fn iter_all_asset_configs(
+    config_type: &str,
+) -> io::Result<impl ParallelIterator<Item = String> + '_> {
+    let mut path = get_asset_dir();
+    path.push("configs");
+    path.push(config_type);
+
+    let directory = fs::read_dir(path)?;
+
+    Ok(directory
+        .into_iter()
+        .collect::<Vec<_>>()
+        .into_par_iter()
+        .filter_map(|entry| match entry {
+            Ok(entry) => {
+                let name = entry.file_name();
+                let name = match name.to_str() {
+                    Some(name) => name,
+                    None => {
+                        log::error!("Failed to read directory entry");
+                        return None;
+                    }
+                };
+                match read_asset_config(config_type, name) {
+                    Ok(cfg) => Some(cfg),
+                    Err(e) => {
+                        log::error!("Failed to read config: {e}");
+                        None
+                    }
+                }
+            }
+            Err(e) => {
+                log::error!("Failed to read directory entry: {e}");
+                None
+            }
+        }))
 }
 
 /// Writes the serialized config and returns the result.

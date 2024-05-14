@@ -1,7 +1,7 @@
 use std::time::Instant;
 
 use crate::{
-    common::{chunk, Voxel},
+    common::{chunk, VoxelHandle},
     ecs::{components::Chunk, schedules::Update},
     utils::file_system,
 };
@@ -26,13 +26,14 @@ pub struct GeneratorPackage;
 
 impl Package for GeneratorPackage {
     fn initialize(&mut self, app: &mut crate::application::Application) {
-        let terrain_options = match file_system::read_asset_config("terrain_gen_options") {
-            Ok(options) => options,
-            Err(e) => {
-                log::error!("Failed to read terrain generation options: {}", e);
-                return;
-            }
-        };
+        let terrain_options =
+            match file_system::read_asset_config("generation", "terrain_gen_options") {
+                Ok(options) => options,
+                Err(e) => {
+                    log::error!("Failed to read terrain generation options: {}", e);
+                    return;
+                }
+            };
         let terrain_options = match ron::de::from_str(&terrain_options) {
             Ok(options) => options,
             Err(e) => {
@@ -41,7 +42,7 @@ impl Package for GeneratorPackage {
             }
         };
 
-        let cave_options = match file_system::read_asset_config("cave_gen_options") {
+        let cave_options = match file_system::read_asset_config("generation", "cave_gen_options") {
             Ok(options) => options,
             Err(e) => {
                 log::error!("Failed to read cave generation options: {}", e);
@@ -104,7 +105,11 @@ pub fn generate_chunk_data_3d(
                             if height >= world_pos.y
                                 && generator.does_cave_contains_voxel(world_pos)
                             {
-                                Some(Voxel { id: 0 })
+                                if world_pos.y > -10.0 {
+                                    Some(VoxelHandle { id: 0 })
+                                } else {
+                                    Some(VoxelHandle { id: 1 })
+                                }
                             } else {
                                 None
                             }

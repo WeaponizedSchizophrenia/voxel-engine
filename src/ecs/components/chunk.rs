@@ -5,10 +5,14 @@ use crate::{
         self,
         chunk::{self, BinaryVoxelContainer},
         face_dir::FaceDir,
-        Voxel,
+        VoxelHandle,
     },
-    ecs::packages::render_init::RenderContext,
-    rendering::{index, instance::Instance, vertex::Vertex},
+    ecs::packages::{render_init::RenderContext, voxel_registry::VoxelRegistry},
+    rendering::{
+        index::{self, Index},
+        instance::Instance,
+        vertex::Vertex,
+    },
 };
 use bevy_ecs::component::Component;
 use nalgebra::{Matrix4, Vector3};
@@ -20,7 +24,7 @@ use super::Geometry;
 /// Contains the data for a single chunk.
 #[derive(Component)]
 pub struct Chunk {
-    pub voxels: Vec<Option<Voxel>>,
+    pub voxels: Vec<Option<VoxelHandle>>,
     #[allow(unused)]
     index: Vector3<i32>,
 }
@@ -44,7 +48,7 @@ impl Chunk {
     pub fn try_sample<V3: Into<(usize, usize, usize)>>(
         &self,
         position: V3,
-    ) -> Option<&Option<Voxel>> {
+    ) -> Option<&Option<VoxelHandle>> {
         let position = position.into();
         self.voxels
             .get(position.0 + position.1 * CHUNK_LENGTH + position.2 * CHUNK_LENGTH * CHUNK_LENGTH)
@@ -55,7 +59,7 @@ impl Chunk {
     /// ## Panics
     /// If the position is out of bounds.
     #[allow(unused)]
-    pub fn sample<V3: Into<(usize, usize, usize)>>(&self, position: V3) -> &Option<Voxel> {
+    pub fn sample<V3: Into<(usize, usize, usize)>>(&self, position: V3) -> &Option<VoxelHandle> {
         let position = position.into();
         &self.voxels
             [position.0 + position.1 * CHUNK_LENGTH + position.2 * CHUNK_LENGTH * CHUNK_LENGTH]
@@ -70,7 +74,7 @@ impl Chunk {
     pub fn try_sample_mut<V3: Into<(usize, usize, usize)>>(
         &mut self,
         position: V3,
-    ) -> Option<&mut Option<Voxel>> {
+    ) -> Option<&mut Option<VoxelHandle>> {
         let position = position.into();
         self.voxels.get_mut(
             position.0 + position.1 * CHUNK_LENGTH + position.2 * CHUNK_LENGTH * CHUNK_LENGTH,
@@ -85,7 +89,7 @@ impl Chunk {
     pub fn sample_mut<V3: Into<(usize, usize, usize)>>(
         &mut self,
         position: V3,
-    ) -> &mut Option<Voxel> {
+    ) -> &mut Option<VoxelHandle> {
         let position = position.into();
         &mut self.voxels
             [position.0 + position.1 * CHUNK_LENGTH + position.2 * CHUNK_LENGTH * CHUNK_LENGTH]
@@ -97,8 +101,12 @@ impl Chunk {
         self.index
     }
 
-    pub fn build_mesh(&self, render_context: &RenderContext) -> HashMap<Voxel, Geometry> {
-        let mut meshes: HashMap<Voxel, (Vec<Vertex>, Vec<u16>)> = HashMap::default();
+    pub fn build_mesh(
+        &self,
+        render_context: &RenderContext,
+        voxel_registry: &VoxelRegistry,
+    ) -> HashMap<VoxelHandle, Geometry> {
+        let mut meshes: HashMap<VoxelHandle, (Vec<Vertex>, Vec<Index>)> = HashMap::default();
 
         const ONE: BinaryVoxelContainer = 1;
 
@@ -134,7 +142,8 @@ impl Chunk {
             }
         }
 
-        let mut data: [HashMap<Voxel, [[BinaryVoxelContainer; CHUNK_LENGTH]; CHUNK_LENGTH]>; 6] = [
+        let mut data: [HashMap<VoxelHandle, [[BinaryVoxelContainer; CHUNK_LENGTH]; CHUNK_LENGTH]>;
+            6] = [
             HashMap::new(),
             HashMap::new(),
             HashMap::new(),
@@ -181,6 +190,7 @@ impl Chunk {
                         q.append_to_vertices(
                             &mut voxel_geometry.0,
                             &mut voxel_geometry.1,
+                            voxel_registry.voxels[&voxel.id].get_texture_index(),
                             face_dir,
                             axis_pos as i32,
                         )

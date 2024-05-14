@@ -8,6 +8,7 @@ pub mod input_provider;
 pub mod pipeline_server;
 pub mod render_init;
 pub mod time;
+pub mod voxel_registry;
 pub mod window_surface;
 
 /// The initialization stage of a package.

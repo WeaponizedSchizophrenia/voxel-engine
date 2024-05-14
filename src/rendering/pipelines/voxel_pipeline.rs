@@ -1,8 +1,12 @@
+use std::num::NonZeroU32;
+
 use wgpu::{
-    BindGroupLayout, ColorTargetState, ColorWrites, DepthStencilState, Device, Face, FragmentState,
-    FrontFace, MultisampleState, PipelineCompilationOptions, PipelineLayoutDescriptor, PolygonMode,
+    BindGroupLayout, BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingType,
+    ColorTargetState, ColorWrites, DepthStencilState, Device, Face, FragmentState, FrontFace,
+    MultisampleState, PipelineCompilationOptions, PipelineLayoutDescriptor, PolygonMode,
     PrimitiveState, PrimitiveTopology, RenderPass, RenderPipeline, RenderPipelineDescriptor,
-    ShaderModuleDescriptor, ShaderSource, TextureFormat, VertexState,
+    SamplerBindingType, ShaderModuleDescriptor, ShaderSource, ShaderStages, TextureFormat,
+    TextureSampleType, TextureViewDimension, VertexState,
 };
 
 use crate::{
@@ -14,6 +18,7 @@ use crate::{
 pub struct VoxelPipeline {
     pipeline: RenderPipeline,
     pub camera_bind_group_layout: BindGroupLayout,
+    pub voxel_texture_bind_group_layout: BindGroupLayout,
 }
 
 impl super::PipelineTrait for VoxelPipeline {
@@ -39,9 +44,32 @@ impl VoxelPipeline {
         let camera_bind_group_layout =
             device.create_bind_group_layout(&camera::CAMERA_BIND_GROUP_LAYOUT_DESCRIPTOR);
 
+        let voxel_texture_bind_group_layout =
+            device.create_bind_group_layout(&BindGroupLayoutDescriptor {
+                label: Some("bind_group_layout_voxel_texture"),
+                entries: &[
+                    BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: ShaderStages::FRAGMENT,
+                        ty: BindingType::Texture {
+                            sample_type: TextureSampleType::Float { filterable: true },
+                            view_dimension: TextureViewDimension::D2Array,
+                            multisampled: false,
+                        },
+                        count: Some(unsafe { NonZeroU32::new_unchecked(2) }),
+                    },
+                    BindGroupLayoutEntry {
+                        binding: 1,
+                        visibility: ShaderStages::FRAGMENT,
+                        ty: BindingType::Sampler(SamplerBindingType::Filtering),
+                        count: None,
+                    },
+                ],
+            });
+
         let pipeline_layout = device.create_pipeline_layout(&PipelineLayoutDescriptor {
             label: Some("pipeline_layout_voxel"),
-            bind_group_layouts: &[&camera_bind_group_layout],
+            bind_group_layouts: &[&camera_bind_group_layout, &voxel_texture_bind_group_layout],
             push_constant_ranges: &[],
         });
 
@@ -98,6 +126,7 @@ impl VoxelPipeline {
         Self {
             pipeline,
             camera_bind_group_layout,
+            voxel_texture_bind_group_layout,
         }
     }
 }

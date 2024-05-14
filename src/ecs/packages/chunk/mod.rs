@@ -13,7 +13,7 @@ use crate::ecs::{
     schedules::Update,
 };
 
-use super::{generator, render_init::RenderContext, Package};
+use super::{generator, render_init::RenderContext, voxel_registry::VoxelRegistry, Package};
 
 pub struct ChunkPackage;
 
@@ -39,6 +39,7 @@ pub fn chunk_mesher_system(
     commands: ParallelCommands,
     chunks: Query<(Entity, &Chunk), Changed<Chunk>>,
     render_context: Res<RenderContext>,
+    voxel_registry: Res<VoxelRegistry>,
 ) {
     if chunks.is_empty() {
         return;
@@ -48,7 +49,7 @@ pub fn chunk_mesher_system(
     let start = Instant::now();
 
     chunks.par_iter().for_each(|(entity, chunk)| {
-        for (_voxel, geometry) in chunk.build_mesh(&render_context) {
+        for (_voxel, geometry) in chunk.build_mesh(&render_context, &voxel_registry) {
             commands.command_scope(|mut commands| {
                 commands
                     .entity(entity)

@@ -1,4 +1,4 @@
-use nalgebra::Vector2;
+use nalgebra::{Vector2, Vector3};
 
 use crate::rendering::{index::Index, vertex::Vertex};
 
@@ -22,6 +22,7 @@ impl Quad {
         self,
         vertices: &mut Vec<Vertex>,
         indices: &mut Vec<Index>,
+        voxel_texture_index: Vector3<u32>,
         face_dir: FaceDir,
         axis_pos: i32,
     ) {
@@ -38,21 +39,25 @@ impl Quad {
                 position: get_pos(self.position.x, self.position.y),
                 tex_coords: [0.0, 0.0],
                 normal,
+                texture_index: voxel_texture_index.into(),
             },
             Vertex {
                 position: get_pos(self.position.x + self.size.x, self.position.y),
                 tex_coords: [self.size.x as f32, 0.0],
                 normal,
+                texture_index: voxel_texture_index.into(),
             },
             Vertex {
                 position: get_pos(self.position.x, self.position.y + self.size.y),
                 tex_coords: [0.0, self.size.y as f32],
                 normal,
+                texture_index: voxel_texture_index.into(),
             },
             Vertex {
                 position: get_pos(self.position.x + self.size.x, self.position.y + self.size.y),
                 tex_coords: [self.size.x as f32, self.size.y as f32],
                 normal,
+                texture_index: voxel_texture_index.into(),
             },
         ];
 
