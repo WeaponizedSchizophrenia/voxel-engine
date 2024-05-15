@@ -12,6 +12,8 @@ mod cave_options;
 mod common;
 mod resource;
 mod terrain_options;
+mod generation_options;
+pub use generation_options::GenerationOptions;
 
 use bevy_ecs::{
     query::Added,
@@ -26,6 +28,24 @@ pub struct GeneratorPackage;
 
 impl Package for GeneratorPackage {
     fn initialize(&mut self, app: &mut crate::application::Application) {
+        let generation_options = match file_system::read_asset_config(
+            "generation",
+            "generation_options",
+        ) {
+            Ok(options) => options,
+            Err(e) => {
+                log::error!("Failed to read generation options: {}", e);
+                return;
+            }
+        };
+        let generation_options = match ron::de::from_str::<GenerationOptions>(&generation_options) {
+            Ok(options) => options,
+            Err(e) => {
+                log::error!("Failed to deserialize generation options: {}", e);
+                return;
+            }
+        };
+
         let terrain_options =
             match file_system::read_asset_config("generation", "terrain_gen_options") {
                 Ok(options) => options,
@@ -57,6 +77,7 @@ impl Package for GeneratorPackage {
             }
         };
 
+        app.insert_resource(generation_options);
         app.insert_resource(Generator::new(terrain_options, cave_options));
         app.add_systems(Update, generate_chunk_data_3d);
     }
@@ -66,6 +87,7 @@ impl Package for GeneratorPackage {
 pub fn generate_chunk_data_3d(
     mut query: Query<&mut Chunk, Added<Chunk>>,
     generator: Res<Generator>,
+    generation_options: Res<GenerationOptions>,
 ) {
     /// Converts the given local x, y and z coordinates of the chunk to world coordinates by using the chunk index to transform them.
     fn get_world_pos(index: &Vector3<i32>, x: i32, y: i32, z: i32) -> Vector3<f32> {
@@ -79,6 +101,7 @@ pub fn generate_chunk_data_3d(
     let start = Instant::now();
 
     let generator = &generator;
+    let generation_options = &generation_options;
     query.par_iter_mut().for_each(|mut chunk| {
         let index = chunk.get_index();
         let height_map = &(0..chunk::CHUNK_LENGTHI32)
@@ -106,15 +129,10 @@ pub fn generate_chunk_data_3d(
                                 && generator.does_cave_contains_voxel(world_pos)
                             {
                                 let delta = height - world_pos.y;
-
-                                // TODO: Put this in an asset file
-                                const DIRT_HEIGHT: f32 = 7.0;
-                                const STONE_THRESHOLD: f32 = 10.0;
-                                const DIRT_VARIATION: f32 = 5.5;
-                                let grass_threshold = if delta >= STONE_THRESHOLD {
+                                let grass_threshold = if delta >= generation_options.stone_threshold {
                                     (rand::random::<f32>() * 2.0 - 1.0)
-                                        * DIRT_VARIATION
-                                        + DIRT_HEIGHT
+                                        * generation_options.dirt_variation
+                                        + generation_options.dirt_height
                                 } else {
                                     f32::INFINITY
                                 };
