@@ -1,12 +1,8 @@
-use std::num::NonZeroU32;
-
 use wgpu::{
-    BindGroupLayout, BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingType,
-    ColorTargetState, ColorWrites, DepthStencilState, Device, Face, FragmentState, FrontFace,
-    MultisampleState, PipelineCompilationOptions, PipelineLayoutDescriptor, PolygonMode,
+    BindGroupLayout, ColorTargetState, ColorWrites, DepthStencilState, Device, Face, FragmentState,
+    FrontFace, MultisampleState, PipelineCompilationOptions, PipelineLayoutDescriptor, PolygonMode,
     PrimitiveState, PrimitiveTopology, RenderPass, RenderPipeline, RenderPipelineDescriptor,
-    SamplerBindingType, ShaderModuleDescriptor, ShaderSource, ShaderStages, TextureFormat,
-    TextureSampleType, TextureViewDimension, VertexState,
+    ShaderModuleDescriptor, ShaderSource, TextureFormat, VertexState,
 };
 
 use crate::{
@@ -33,7 +29,11 @@ impl VoxelPipeline {
     /// ## Parameters
     /// * `device` - The `wgpu::Device` to use for compiling.
     /// * `src` - The shader source code.
-    pub fn new(device: &Device, src: &str) -> Self {
+    pub fn new(
+        device: &Device,
+        voxel_texture_bind_group_layout: BindGroupLayout,
+        src: &str,
+    ) -> Self {
         let constants = Default::default();
 
         let module = device.create_shader_module(ShaderModuleDescriptor {
@@ -43,31 +43,6 @@ impl VoxelPipeline {
 
         let camera_bind_group_layout =
             device.create_bind_group_layout(&camera::CAMERA_BIND_GROUP_LAYOUT_DESCRIPTOR);
-
-        let voxel_texture_bind_group_layout =
-            device.create_bind_group_layout(&BindGroupLayoutDescriptor {
-                label: Some("bind_group_layout_voxel_texture"),
-                entries: &[
-                    BindGroupLayoutEntry {
-                        binding: 0,
-                        visibility: ShaderStages::FRAGMENT,
-                        ty: BindingType::Texture {
-                            sample_type: TextureSampleType::Float { filterable: true },
-                            view_dimension: TextureViewDimension::D2Array,
-                            multisampled: false,
-                        },
-                        // I dont know how to make the count dynamic.
-                        // Should consider getting the texture count before creating the shader.
-                        count: Some(unsafe { NonZeroU32::new_unchecked(5) }),
-                    },
-                    BindGroupLayoutEntry {
-                        binding: 1,
-                        visibility: ShaderStages::FRAGMENT,
-                        ty: BindingType::Sampler(SamplerBindingType::Filtering),
-                        count: None,
-                    },
-                ],
-            });
 
         let pipeline_layout = device.create_pipeline_layout(&PipelineLayoutDescriptor {
             label: Some("pipeline_layout_voxel"),

@@ -79,6 +79,11 @@ impl TextureArray {
             sampler,
         }
     }
+
+    /// Gets the length of the texture array.
+    pub fn len(&self) -> u32 {
+        self.views.len() as u32
+    }
 }
 
 /// Describes the creation of `TextureArray`.

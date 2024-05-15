@@ -4,7 +4,7 @@ use bevy_ecs::{
     bundle::Bundle,
     schedule::{IntoSystemConfigs, Schedule, ScheduleLabel},
     system::{Res, Resource},
-    world::{EntityWorldMut, World},
+    world::{EntityWorldMut, Mut, World},
 };
 use winit::{
     application::ApplicationHandler,
@@ -67,6 +67,11 @@ impl Application {
     /// Gets the specified `Resource`. If it does not exist returns None.
     pub fn get_resource<T: Resource>(&self) -> Option<Res<T>> {
         self.world.get_resource_ref::<T>()
+    }
+
+    /// Gets the specified mutable `Resource`. If it does not exist returns None.
+    pub fn get_resource_mut<T: Resource>(&mut self) -> Option<Mut<T>> {
+        self.world.get_resource_mut::<T>()
     }
 
     /// Inserts the given `resource` into the world.

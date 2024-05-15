@@ -1,9 +1,9 @@
-use std::{fs::File, io::BufReader, path::Path};
+use std::{fs::File, io::BufReader, num::NonZeroU32, path::Path};
 
 use crate::{
     common::voxel::{Voxel, VoxelTexture},
     rendering::{
-        pipelines::Pipeline,
+        pipelines::{Pipeline, VoxelPipeline},
         texture_array::{TextureArray, TextureArrayCreationDescriptor},
     },
     utils::file_system,
@@ -17,7 +17,9 @@ use rayon::iter::{IntoParallelIterator, ParallelIterator};
 pub use resource::VoxelRegistry;
 use thiserror::Error;
 use wgpu::{
-    AddressMode, BindGroupDescriptor, BindGroupEntry, BindingResource, FilterMode, TextureFormat,
+    AddressMode, BindGroupDescriptor, BindGroupEntry, BindGroupLayoutDescriptor,
+    BindGroupLayoutEntry, BindingResource, BindingType, FilterMode, SamplerBindingType,
+    ShaderStages, TextureFormat, TextureSampleType, TextureViewDimension,
 };
 
 /// Package for `VoxelRegistry`.
@@ -29,22 +31,6 @@ impl Package for VoxelRegistryPackage {
             Some(rc) => rc,
             None => {
                 log::error!("Failed to get render context");
-                return;
-            }
-        };
-
-        let pipeline_server = match app.get_resource::<PipelineServer>() {
-            Some(server) => server,
-            None => {
-                log::error!("Failed to get pipeline server");
-                return;
-            }
-        };
-
-        let voxel_pipeline = match pipeline_server.get_pipeline("voxel").map(AsRef::as_ref) {
-            Some(Pipeline::Voxel(voxel)) => voxel,
-            _ => {
-                log::error!("Failed to get Voxel pipeline");
                 return;
             }
         };
@@ -144,11 +130,44 @@ impl Package for VoxelRegistryPackage {
             },
         );
 
+        let texture_count = match NonZeroU32::new(textures.len()) {
+            Some(count) => count,
+            None => {
+                log::error!("Invalid texture count");
+                return;
+            }
+        };
+
+        let voxel_texture_bind_group_layout =
+            render_context
+                .device
+                .create_bind_group_layout(&BindGroupLayoutDescriptor {
+                    label: Some("bind_group_layout_voxel_texture"),
+                    entries: &[
+                        BindGroupLayoutEntry {
+                            binding: 0,
+                            visibility: ShaderStages::FRAGMENT,
+                            ty: BindingType::Texture {
+                                sample_type: TextureSampleType::Float { filterable: true },
+                                view_dimension: TextureViewDimension::D2Array,
+                                multisampled: false,
+                            },
+                            count: Some(texture_count),
+                        },
+                        BindGroupLayoutEntry {
+                            binding: 1,
+                            visibility: ShaderStages::FRAGMENT,
+                            ty: BindingType::Sampler(SamplerBindingType::Filtering),
+                            count: None,
+                        },
+                    ],
+                });
+
         let bind_group = render_context
             .device
             .create_bind_group(&BindGroupDescriptor {
                 label: Some("bind_group_voxels"),
-                layout: &voxel_pipeline.voxel_texture_bind_group_layout,
+                layout: &voxel_texture_bind_group_layout,
                 entries: &[
                     BindGroupEntry {
                         binding: 0,
@@ -163,11 +182,35 @@ impl Package for VoxelRegistryPackage {
                 ],
             });
 
-        app.insert_resource(VoxelRegistry {
+        let voxel_registry = VoxelRegistry {
             voxels: voxels.into_iter().map(|voxel| (voxel.id, voxel)).collect(),
             textures,
             bind_group,
-        })
+        };
+
+        let shader = match file_system::read_wgsl_shader("voxel") {
+            Ok(shader) => shader,
+            Err(e) => {
+                log::error!("{e}");
+                return;
+            }
+        };
+        let pipeline = VoxelPipeline::new(
+            &render_context.device,
+            voxel_texture_bind_group_layout,
+            &shader,
+        );
+
+        app.insert_resource(voxel_registry);
+
+        let mut pipeline_server = match app.get_resource_mut::<PipelineServer>() {
+            Some(server) => server,
+            None => {
+                log::error!("Failed to get pipeline server");
+                return;
+            }
+        };
+        pipeline_server.add_pipeline("voxel".to_owned(), Pipeline::Voxel(pipeline));
     }
 }
 
