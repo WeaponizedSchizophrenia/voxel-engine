@@ -56,6 +56,8 @@ impl VoxelPipeline {
                             view_dimension: TextureViewDimension::D2Array,
                             multisampled: false,
                         },
+                        // I dont know how to make the count dynamic.
+                        // Should consider getting the texture count before creating the shader.
                         count: Some(unsafe { NonZeroU32::new_unchecked(5) }),
                     },
                     BindGroupLayoutEntry {

@@ -21,7 +21,6 @@ use super::Geometry;
 #[derive(Component)]
 pub struct Chunk {
     pub voxels: Vec<Option<VoxelHandle>>,
-    #[allow(unused)]
     index: Vector3<i32>,
 }
 
@@ -97,6 +96,7 @@ impl Chunk {
         self.index
     }
 
+    /// Builds the mesh for the chunk.
     pub fn build_mesh(
         &self,
         render_context: &RenderContext,

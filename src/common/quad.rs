@@ -16,6 +16,7 @@ impl Quad {
     /// ## Arguments
     /// * `vertices` - The vector to append the vertices to.
     /// * `indices` - The vector to append the indices to.
+    /// * `voxel_texture_index` - The texture index of the voxel, that this quad represents.
     /// * `face_dir` - The face direction of the quad.
     /// * `axis_pos` - The axis position of the quad.
     pub fn append_to_vertices(

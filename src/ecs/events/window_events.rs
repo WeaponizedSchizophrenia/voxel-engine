@@ -25,6 +25,7 @@ impl From<PhysicalSize<u32>> for WindowResized {
 }
 
 impl WindowResized {
+    /// Returns the new width and height as a tuple.
     pub fn as_tuple(&self) -> (u32, u32) {
         (self.new_width, self.new_height)
     }

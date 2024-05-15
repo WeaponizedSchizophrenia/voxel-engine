@@ -1,5 +1,8 @@
 use serde::Deserialize;
 
+/// The noise type to use for the noise generation.
+///
+/// This is different from the `fastnoise_lite::NoiseType` because this can be deserialized.
 #[derive(Copy, Clone, Debug, PartialEq, Deserialize)]
 pub enum NoiseType {
     OpenSimplex2,
@@ -23,6 +26,9 @@ impl From<NoiseType> for fastnoise_lite::NoiseType {
     }
 }
 
+/// The rotation type to use for the noise generation.
+///
+/// This is different from the `fastnoise_lite::RotationType3D` because this can be deserialized.
 #[derive(Copy, Clone, Debug, PartialEq, Deserialize)]
 pub enum RotationType3D {
     None,
@@ -40,6 +46,9 @@ impl From<RotationType3D> for fastnoise_lite::RotationType3D {
     }
 }
 
+/// The fractal type to use for the noise generation.
+///
+/// This is different from the `fastnoise_lite::FractalType` because this can be deserialized.
 #[derive(Copy, Clone, Debug, PartialEq, Deserialize)]
 pub enum FractalType {
     None,

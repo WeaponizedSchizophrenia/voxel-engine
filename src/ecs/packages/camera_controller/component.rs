@@ -10,12 +10,19 @@ pub struct CurrentCameraController;
 /// A camera controller that controls the camera.
 #[derive(Component)]
 pub struct CameraController {
+    /// The movement speed of the camera controller.
     pub speed: f32,
+    /// The mouse sensitivity of the camera controller.
     pub sensitivity: f32,
+    /// The position of the camera in world space.
     pub position: Point3<f32>,
+    /// The aspect ratio of the camera.
     pub aspect_ratio: f32,
+    /// The vertical field of view in radians of the camera.
     pub fov: f32,
+    /// The current yaw of the camera.
     pub yaw: f32,
+    /// The current pitch of the camera.
     pub pitch: f32,
 }
 
@@ -55,6 +62,7 @@ impl CameraController {
         }
     }
 
+    /// Returns a unit vector pointing in the looking direction of the camera.
     pub fn get_direction(&self) -> Unit<Vector3<f32>> {
         let (yaw_sin, yaw_cos) = self.yaw.sin_cos();
         let (pitch_sin, pitch_cos) = self.pitch.sin_cos();

@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 /// The global config resource.
 #[derive(Resource, Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Config {
-    /// The color that the background should be cleared to.
+    /// The mouse sensitivity.
     pub sensitivity: f32,
 }
 

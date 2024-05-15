@@ -15,6 +15,7 @@ use crate::ecs::{
 
 use super::{generator, render_init::RenderContext, voxel_registry::VoxelRegistry, Package};
 
+/// Package for initializing chunks.
 pub struct ChunkPackage;
 
 impl Package for ChunkPackage {
@@ -26,7 +27,6 @@ impl Package for ChunkPackage {
                 }
             }
         }
-        // app.spawn(Chunk::new(Vector3::zeros()));
 
         app.add_systems(
             Update,
@@ -35,6 +35,7 @@ impl Package for ChunkPackage {
     }
 }
 
+/// Meshes the chunks that have been changed.
 pub fn chunk_mesher_system(
     commands: ParallelCommands,
     chunks: Query<(Entity, &Chunk), Changed<Chunk>>,

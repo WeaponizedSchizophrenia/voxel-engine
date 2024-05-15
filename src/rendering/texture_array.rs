@@ -6,6 +6,7 @@ use wgpu::{
 
 use crate::ecs::packages::render_init::RenderContext;
 
+/// A `wgpu::Texture` array wrapper.
 pub struct TextureArray {
     pub texture: wgpu::Texture,
     pub views: Vec<TextureView>,
@@ -13,6 +14,7 @@ pub struct TextureArray {
 }
 
 impl TextureArray {
+    /// Creates a new `TextureArray`.from the specified data.
     pub fn new(rc: &RenderContext, desc: &TextureArrayCreationDescriptor<'_>) -> Self {
         let size = Extent3d {
             width: desc.dimensions.0,
@@ -79,15 +81,24 @@ impl TextureArray {
     }
 }
 
+/// Describes the creation of `TextureArray`.
 #[derive(Clone, Copy)]
 pub struct TextureArrayCreationDescriptor<'a> {
+    /// The label to use for the `wgpu::Texture`.
     pub texture_label: Option<&'a str>,
+    /// The label to use for the `wgpu::Sampler`.
     pub sampler_label: Option<&'a str>,
+    /// The width and height of the textures in the array (all the textures should be the same size).
     pub dimensions: (u32, u32),
+    /// The data of the textures in the array.
     pub data: &'a [u8],
+    /// How many bytes make up a single pixel.
     pub bytes_per_pixel: u32,
+    /// The texture format.
     pub format: TextureFormat,
+    /// The `AddressMode` to use for sampling the textures.
     pub adress_mode: AddressMode,
+    /// The `FilterMode` to use for sampling the textures.
     pub filter_mode: FilterMode,
 }
 

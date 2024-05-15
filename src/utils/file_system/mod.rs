@@ -28,6 +28,7 @@ pub fn read_asset_config(config_type: &str, name: &str) -> io::Result<String> {
     read::read_text(path)
 }
 
+/// Returns a parallel iterator over all asset config files for the provided config type.
 pub fn iter_all_asset_configs(
     config_type: &str,
 ) -> io::Result<impl ParallelIterator<Item = String> + '_> {

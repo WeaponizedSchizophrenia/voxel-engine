@@ -3,20 +3,26 @@ use std::path::PathBuf;
 use nalgebra::{vector, Vector3};
 use serde::{Deserialize, Serialize};
 
-/// Contains the data for a single voxel.
+/// Lightweight handle to a voxel.
 #[derive(Default, Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct VoxelHandle {
+    /// The voxel id.
     pub id: u32,
 }
 
-#[derive(Default, Debug, Serialize, Deserialize)]
+/// Contains the data for a single voxel.
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Voxel {
+    /// The voxel id.
     pub id: u32,
+    /// The voxel name.
     pub name: String,
+    /// The voxel texture.
     pub texture: VoxelTexture,
 }
 
 impl Voxel {
+    /// Returns the texture indices fore each side of the voxel.
     pub fn get_texture_index(&self) -> Vector3<u32> {
         match &self.texture {
             VoxelTexture::Single { array_index, .. } => {
@@ -28,13 +34,14 @@ impl Voxel {
                 let start = array_index_start.unwrap_or(0);
                 vector![start, start + 1, start + 2,]
             }
-            VoxelTexture::None => Vector3::from_element(0),
         }
     }
 }
 
-#[derive(Default, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Contains data for a voxel texture.
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum VoxelTexture {
+    /// A single voxel texture that gets displayed on every face of the voxel.
     Single {
         /// The path to the voxel texture from the /assets directory.
         path: PathBuf,
@@ -43,6 +50,7 @@ pub enum VoxelTexture {
         #[serde(skip)]
         array_index: Option<u32>,
     },
+    /// Three textures that get displayed on the top, sides and bottom of a voxel.
     Three {
         top_path: PathBuf,
         side_path: PathBuf,
@@ -52,6 +60,4 @@ pub enum VoxelTexture {
         #[serde(skip)]
         array_index_start: Option<u32>,
     },
-    #[default]
-    None,
 }

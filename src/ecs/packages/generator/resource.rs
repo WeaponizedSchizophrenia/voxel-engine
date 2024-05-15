@@ -41,13 +41,15 @@ impl Generator {
         }
     }
 
+    /// Gets the terrain height at specified X and Z world coordinates.
     pub fn get_terrain_height<V2: Into<[f32; 2]>>(&self, pos: V2) -> f32 {
         let pos = pos.into();
         self.terrain_height_noise.get_noise_2d(pos[0], pos[1]) * self.terrain_options.height_mult
             + self.terrain_options.base_height
     }
 
-    pub fn does_cave_contains_voxel<V3: Into<[f32; 3]>>(&self, pos: V3) -> bool {
+    /// Determines whether the underground position contains a voxel or not.
+    pub fn does_underground_contains_voxel<V3: Into<[f32; 3]>>(&self, pos: V3) -> bool {
         let pos = pos.into();
 
         self.cave_noise.get_noise_3d(pos[0], pos[1], pos[2]) >= self.cave_options.voxel_threshold

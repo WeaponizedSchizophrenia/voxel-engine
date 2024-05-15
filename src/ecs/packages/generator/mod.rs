@@ -10,9 +10,9 @@ use super::Package;
 
 mod cave_options;
 mod common;
+mod generation_options;
 mod resource;
 mod terrain_options;
-mod generation_options;
 pub use generation_options::GenerationOptions;
 
 use bevy_ecs::{
@@ -28,16 +28,14 @@ pub struct GeneratorPackage;
 
 impl Package for GeneratorPackage {
     fn initialize(&mut self, app: &mut crate::application::Application) {
-        let generation_options = match file_system::read_asset_config(
-            "generation",
-            "generation_options",
-        ) {
-            Ok(options) => options,
-            Err(e) => {
-                log::error!("Failed to read generation options: {}", e);
-                return;
-            }
-        };
+        let generation_options =
+            match file_system::read_asset_config("generation", "generation_options") {
+                Ok(options) => options,
+                Err(e) => {
+                    log::error!("Failed to read generation options: {}", e);
+                    return;
+                }
+            };
         let generation_options = match ron::de::from_str::<GenerationOptions>(&generation_options) {
             Ok(options) => options,
             Err(e) => {
@@ -83,7 +81,7 @@ impl Package for GeneratorPackage {
     }
 }
 
-/// Generates chunk data.
+/// Generates chunk data for newly added chunks.
 pub fn generate_chunk_data_3d(
     mut query: Query<&mut Chunk, Added<Chunk>>,
     generator: Res<Generator>,
@@ -126,10 +124,11 @@ pub fn generate_chunk_data_3d(
                             let height = height_map[(x + z * chunk::CHUNK_LENGTHI32) as usize];
 
                             if height >= world_pos.y
-                                && generator.does_cave_contains_voxel(world_pos)
+                                && generator.does_underground_contains_voxel(world_pos)
                             {
                                 let delta = height - world_pos.y;
-                                let grass_threshold = if delta >= generation_options.stone_threshold {
+                                let grass_threshold = if delta >= generation_options.stone_threshold
+                                {
                                     (rand::random::<f32>() * 2.0 - 1.0)
                                         * generation_options.dirt_variation
                                         + generation_options.dirt_height
@@ -138,8 +137,7 @@ pub fn generate_chunk_data_3d(
                                 };
                                 if delta <= 1.0 {
                                     Some(VoxelHandle { id: 0 })
-                                }
-                                else if delta <= grass_threshold {
+                                } else if delta <= grass_threshold {
                                     Some(VoxelHandle { id: 1 })
                                 } else {
                                     Some(VoxelHandle { id: 2 })

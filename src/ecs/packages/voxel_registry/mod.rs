@@ -20,6 +20,7 @@ use wgpu::{
     AddressMode, BindGroupDescriptor, BindGroupEntry, BindingResource, FilterMode, TextureFormat,
 };
 
+/// Package for `VoxelRegistry`.
 pub struct VoxelRegistryPackage;
 
 impl Package for VoxelRegistryPackage {
@@ -74,11 +75,11 @@ impl Package for VoxelRegistryPackage {
                         Ok(data) => {
                             *array_index = Some(images.len() as u32);
                             images.push(data)
-                        },
+                        }
                         Err(e) => {
                             log::error!("Failed to load image: {e}");
                             continue;
-                        },
+                        }
                     };
                 }
                 VoxelTexture::Three {
@@ -87,22 +88,23 @@ impl Package for VoxelRegistryPackage {
                     bottom_path,
                     array_index_start,
                 } => {
-                    let loaded = [top_path, side_path, bottom_path].into_par_iter()
+                    let loaded = [top_path, side_path, bottom_path]
+                        .into_par_iter()
                         .filter_map(|path| match get_image_data(path) {
                             Ok(data) => Some(data),
                             Err(e) => {
                                 log::error!("Failed to load image: {e}");
                                 None
                             }
-                        }).collect::<Vec<_>>();
-                    
+                        })
+                        .collect::<Vec<_>>();
+
                     if loaded.len() != 3 {
                         log::error!("Failed to load all images");
                     }
                     *array_index_start = Some(images.len() as u32);
                     images.extend(loaded);
                 }
-                VoxelTexture::None => unimplemented!(),
             };
         }
 
@@ -169,8 +171,9 @@ impl Package for VoxelRegistryPackage {
     }
 }
 
+/// Describes how an image failed to load.
 #[derive(Error, Debug)]
-pub enum ImageReadError {
+enum ImageLoadError {
     #[error("Unsupported image format.")]
     UnsuportedImageFormat,
     #[error(transparent)]
@@ -179,18 +182,19 @@ pub enum ImageReadError {
     ImageError(#[from] image::ImageError),
 }
 
-fn get_image_data<P: AsRef<Path>>(path: P) -> Result<((u32, u32), Vec<u8>), ImageReadError> {
+/// Convinience function for loading a voxel texture image from a specified path.
+fn get_image_data<P: AsRef<Path>>(path: P) -> Result<((u32, u32), Vec<u8>), ImageLoadError> {
     let asset_dir = file_system::get_asset_dir();
     let path = asset_dir.join(path);
 
-    let image_format = path.extension()
+    let image_format = path
+        .extension()
         .and_then(ImageFormat::from_extension)
-        .ok_or(ImageReadError::UnsuportedImageFormat)?;
+        .ok_or(ImageLoadError::UnsuportedImageFormat)?;
 
     let file = File::open(path)?;
     let image = image::load(BufReader::new(file), image_format)?;
     let dimensions = image.dimensions();
     let data = image.into_rgba8().into_vec();
     Ok((dimensions, data))
-
 }

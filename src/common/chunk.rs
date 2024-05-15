@@ -13,6 +13,10 @@ pub const CHUNK_LENGTHI32: i32 = CHUNK_LENGTH as i32;
 /// The chunk side length as a u32.
 pub const CHUNK_LENGTHU32: u32 = CHUNK_LENGTH as u32;
 
+/// Meshes a slice of a chunk into quads.
+///
+/// ## Arguments
+/// * `slice` - The slice to mesh. The slice is modified in place.
 pub fn mesh_slice(slice: &mut [BinaryVoxelContainer; CHUNK_LENGTH]) -> Vec<Quad> {
     let mut output = vec![];
 
