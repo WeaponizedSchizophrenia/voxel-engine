@@ -105,7 +105,13 @@ pub fn generate_chunk_data_3d(
                             if height >= world_pos.y
                                 && generator.does_cave_contains_voxel(world_pos)
                             {
-                                if world_pos.y > -10.0 {
+                                // TODO: Put this in an asset file
+                                const GRASS_HEIGHT: f32 = 7.0;
+                                const GRASS_VARIATION: f32 = 5.5;
+                                let grass_threshold = (rand::random::<f32>() * 2.0 - 1.0)
+                                    * GRASS_VARIATION
+                                    + GRASS_HEIGHT;
+                                if height - world_pos.y <= grass_threshold {
                                     Some(VoxelHandle { id: 0 })
                                 } else {
                                     Some(VoxelHandle { id: 1 })

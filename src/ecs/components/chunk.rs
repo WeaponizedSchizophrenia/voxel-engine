@@ -8,11 +8,7 @@ use crate::{
         VoxelHandle,
     },
     ecs::packages::{render_init::RenderContext, voxel_registry::VoxelRegistry},
-    rendering::{
-        index::{self, Index},
-        instance::Instance,
-        vertex::Vertex,
-    },
+    rendering::{index, instance::Instance},
 };
 use bevy_ecs::component::Component;
 use nalgebra::{Matrix4, Vector3};
@@ -105,9 +101,7 @@ impl Chunk {
         &self,
         render_context: &RenderContext,
         voxel_registry: &VoxelRegistry,
-    ) -> HashMap<VoxelHandle, Geometry> {
-        let mut meshes: HashMap<VoxelHandle, (Vec<Vertex>, Vec<Index>)> = HashMap::default();
-
+    ) -> Geometry {
         const ONE: BinaryVoxelContainer = 1;
 
         let mut axis_cols = [[[BinaryVoxelContainer::default(); CHUNK_LENGTH]; CHUNK_LENGTH]; 3];
@@ -179,44 +173,39 @@ impl Chunk {
             }
         }
 
+        let mut vertices = vec![];
+        let mut indices = vec![];
         for (axis, voxels) in data.into_iter().enumerate() {
             let face_dir = FaceDir::from_axis(axis);
 
-            for (voxel, mut slices) in voxels.into_iter() {
-                let voxel_geometry = meshes.entry(voxel).or_insert((vec![], vec![]));
-
-                for (axis_pos, slice) in slices.iter_mut().enumerate() {
-                    common::chunk::mesh_slice(slice).into_iter().for_each(|q| {
-                        q.append_to_vertices(
-                            &mut voxel_geometry.0,
-                            &mut voxel_geometry.1,
-                            voxel_registry.voxels[&voxel.id].get_texture_index(),
-                            face_dir,
-                            axis_pos as i32,
-                        )
-                    });
+            for (voxel, slices) in voxels.into_iter() {
+                for (axis_pos, mut slice) in slices.into_iter().enumerate() {
+                    common::chunk::mesh_slice(&mut slice)
+                        .into_iter()
+                        .for_each(|q| {
+                            q.append_to_vertices(
+                                &mut vertices,
+                                &mut indices,
+                                voxel_registry.voxels[&voxel.id].get_texture_index(),
+                                face_dir,
+                                axis_pos as i32,
+                            )
+                        });
                 }
             }
         }
 
-        IntoIterator::into_iter(meshes)
-            .map(|(voxel, (vertices, indices))| {
-                (
-                    voxel,
-                    Geometry::new_instanced(
-                        &render_context.device,
-                        &vertices,
-                        &[Instance {
-                            model_matrix: Matrix4::new_translation(
-                                &self.index.map(|c| c as f32 * chunk::CHUNK_LENGTH as f32),
-                            )
-                            .into(),
-                        }],
-                        &indices,
-                        index::INDEX_FORMAT,
-                    ),
+        Geometry::new_instanced(
+            &render_context.device,
+            &vertices,
+            &[Instance {
+                model_matrix: Matrix4::new_translation(
+                    &self.index.map(|c| c as f32 * chunk::CHUNK_LENGTH as f32),
                 )
-            })
-            .collect()
+                .into(),
+            }],
+            &indices,
+            index::INDEX_FORMAT,
+        )
     }
 }

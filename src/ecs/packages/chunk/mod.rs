@@ -49,13 +49,12 @@ pub fn chunk_mesher_system(
     let start = Instant::now();
 
     chunks.par_iter().for_each(|(entity, chunk)| {
-        for (_voxel, geometry) in chunk.build_mesh(&render_context, &voxel_registry) {
-            commands.command_scope(|mut commands| {
-                commands
-                    .entity(entity)
-                    .insert((voxel_render_descriptor.clone(), geometry));
-            })
-        }
+        let geometry = chunk.build_mesh(&render_context, &voxel_registry);
+        commands.command_scope(|mut commands| {
+            commands
+                .entity(entity)
+                .insert((voxel_render_descriptor.clone(), geometry));
+        });
     });
 
     log::info!("Chunk meshing took {} ms", start.elapsed().as_millis());

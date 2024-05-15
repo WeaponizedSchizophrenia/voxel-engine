@@ -71,10 +71,7 @@ impl Package for VoxelRegistryPackage {
             let image = match &mut voxel.texture {
                 VoxelTexture::Single { path, array_index } => {
                     let path = asset_dir.join(path);
-                    let image_format = match path
-                        .extension()
-                        .map(|e| ImageFormat::from_extension(e))
-                        .flatten()
+                    let image_format = match path.extension().and_then(ImageFormat::from_extension)
                     {
                         Some(format) => format,
                         None => {
