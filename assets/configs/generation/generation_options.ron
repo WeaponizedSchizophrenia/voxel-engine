@@ -1,5 +1,5 @@
 (
     dirt_height: 7.0,
-    stone_threshold: 10.0,
-    dirt_variation: 13.5
+    stone_threshold: 3.5,
+    dirt_variation: 6.5
 )
