@@ -1,0 +1,7 @@
+(
+    id: 1,
+    name: "Dirt",
+    texture: Single(
+        path: "textures/grass_bottom.png"
+    )
+)
