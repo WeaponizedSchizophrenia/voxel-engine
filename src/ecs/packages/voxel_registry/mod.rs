@@ -1,4 +1,4 @@
-use std::{fs::File, io::BufReader};
+use std::{fs::File, io::BufReader, path::Path};
 
 use crate::{
     common::voxel::{Voxel, VoxelTexture},
@@ -15,6 +15,7 @@ mod resource;
 use image::{GenericImageView, ImageFormat};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 pub use resource::VoxelRegistry;
+use thiserror::Error;
 use wgpu::{
     AddressMode, BindGroupDescriptor, BindGroupEntry, BindingResource, FilterMode, TextureFormat,
 };
@@ -67,50 +68,42 @@ impl Package for VoxelRegistryPackage {
 
         let mut images = vec![];
         for voxel in voxels.iter_mut() {
-            let asset_dir = file_system::get_asset_dir();
-            let image = match &mut voxel.texture {
+            match &mut voxel.texture {
                 VoxelTexture::Single { path, array_index } => {
-                    let path = asset_dir.join(path);
-                    let image_format = match path.extension().and_then(ImageFormat::from_extension)
-                    {
-                        Some(format) => format,
-                        None => {
-                            log::error!("Failed to get image format from path: {path:?}");
-                            return;
-                        }
-                    };
-
-                    let file = match File::open(path) {
-                        Ok(file) => file,
-                        Err(e) => {
-                            log::error!("Failed to open file: {e}");
-                            return;
-                        }
-                    };
-                    let image = match image::load(BufReader::new(file), image_format) {
-                        Ok(image) => image,
+                    match get_image_data(path) {
+                        Ok(data) => {
+                            *array_index = Some(images.len() as u32);
+                            images.push(data)
+                        },
                         Err(e) => {
                             log::error!("Failed to load image: {e}");
-                            return;
-                        }
+                            continue;
+                        },
                     };
-                    let dimensions = image.dimensions();
-                    let data = image.into_rgba8().into_vec();
-                    *array_index = Some(images.len() as u32);
-                    (dimensions, data)
                 }
                 VoxelTexture::Three {
-                    top_path: _,
-                    side_path: _,
-                    bottom_path: _,
-                    array_index_start: _,
+                    top_path,
+                    side_path,
+                    bottom_path,
+                    array_index_start,
                 } => {
-                    unimplemented!();
+                    let loaded = [top_path, side_path, bottom_path].into_par_iter()
+                        .filter_map(|path| match get_image_data(path) {
+                            Ok(data) => Some(data),
+                            Err(e) => {
+                                log::error!("Failed to load image: {e}");
+                                None
+                            }
+                        }).collect::<Vec<_>>();
+                    
+                    if loaded.len() != 3 {
+                        log::error!("Failed to load all images");
+                    }
+                    *array_index_start = Some(images.len() as u32);
+                    images.extend(loaded);
                 }
-                VoxelTexture::None => ((1, 1), vec![255; 4]),
+                VoxelTexture::None => unimplemented!(),
             };
-
-            images.push(image);
         }
 
         let dimensions = match images.first() {
@@ -174,4 +167,30 @@ impl Package for VoxelRegistryPackage {
             bind_group,
         })
     }
+}
+
+#[derive(Error, Debug)]
+pub enum ImageReadError {
+    #[error("Unsupported image format.")]
+    UnsuportedImageFormat,
+    #[error(transparent)]
+    IoError(#[from] std::io::Error),
+    #[error(transparent)]
+    ImageError(#[from] image::ImageError),
+}
+
+fn get_image_data<P: AsRef<Path>>(path: P) -> Result<((u32, u32), Vec<u8>), ImageReadError> {
+    let asset_dir = file_system::get_asset_dir();
+    let path = asset_dir.join(path);
+
+    let image_format = path.extension()
+        .and_then(ImageFormat::from_extension)
+        .ok_or(ImageReadError::UnsuportedImageFormat)?;
+
+    let file = File::open(path)?;
+    let image = image::load(BufReader::new(file), image_format)?;
+    let dimensions = image.dimensions();
+    let data = image.into_rgba8().into_vec();
+    Ok((dimensions, data))
+
 }

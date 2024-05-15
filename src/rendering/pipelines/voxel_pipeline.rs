@@ -56,7 +56,7 @@ impl VoxelPipeline {
                             view_dimension: TextureViewDimension::D2Array,
                             multisampled: false,
                         },
-                        count: Some(unsafe { NonZeroU32::new_unchecked(2) }),
+                        count: Some(unsafe { NonZeroU32::new_unchecked(4) }),
                     },
                     BindGroupLayoutEntry {
                         binding: 1,

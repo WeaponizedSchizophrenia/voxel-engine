@@ -1,7 +1,9 @@
 (
     id: 0,
     name: "Grass",
-    texture: Single(
-        path: "textures/grass.png"
+    texture: Three(
+        top_path: "textures/grass_top.png",
+        side_path: "textures/grass_side.png",
+        bottom_path: "textures/grass_bottom.png",
     )
 )

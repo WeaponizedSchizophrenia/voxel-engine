@@ -65,7 +65,12 @@ struct FragmentOutput {
 fn voxel_fragment(in: VertexOutput) -> FragmentOutput {
     var out: FragmentOutput;
 
-    let texture_color = textureSample(voxel_textures, voxel_sampler, in.tex_coords, in.texture_index.x);
+    let texture_color = textureSample(
+        voxel_textures, 
+        voxel_sampler, 
+        -in.tex_coords, 
+        get_texture_index(in.normal, in.texture_index)
+    );
 
     // out.color = vec4<f32>(modulo(in.tex_coords.x, 1.0), modulo(in.tex_coords.y, 1.0), 1.0, 1.0);
     out.color = texture_color;
