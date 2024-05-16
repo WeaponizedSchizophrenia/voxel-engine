@@ -1,4 +1,4 @@
-use bevy_ecs::system::{Query, Res};
+use bevy_ecs::system::{NonSendMut, Query, Res};
 use wgpu::{
     Color, CommandEncoderDescriptor, LoadOp, Operations, RenderPassColorAttachment,
     RenderPassDepthStencilAttachment, RenderPassDescriptor, StoreOp,
@@ -8,14 +8,18 @@ use crate::{
     ecs::{
         components::{Geometry, RenderDescriptor},
         packages::{
-            pipeline_server::PipelineServer, render_init::RenderContext,
-            voxel_registry::VoxelRegistry, window_surface::WindowRenderSurface,
+            debug_gui::DebugCompositor,
+            pipeline_server::PipelineServer,
+            render_init::RenderContext,
+            voxel_registry::VoxelRegistry,
+            window_surface::{Window, WindowRenderSurface},
         },
         resources::Camera,
     },
     rendering::pipelines::PipelineTrait as _,
 };
 
+#[allow(clippy::too_many_arguments)]
 pub fn render_system(
     render_query: Query<(&RenderDescriptor, &Geometry)>,
     render_surface: Res<WindowRenderSurface>,
@@ -23,6 +27,9 @@ pub fn render_system(
     context: Res<RenderContext>,
     camera: Res<Camera>,
     voxel_textures: Res<VoxelRegistry>,
+    window: Res<Window>,
+    render_context: Res<RenderContext>,
+    mut debug_compositor: Option<NonSendMut<DebugCompositor>>,
 ) {
     let output = render_surface.get_texture().unwrap();
     let output_view = output.texture.create_view(&Default::default());
@@ -72,6 +79,25 @@ pub fn render_system(
 
             geometry.render_to_render_pass(&mut render_pass);
         }
+    }
+
+    if let Some(debug_compositor) = debug_compositor.as_mut() {
+        let render_pass = command_encoder.begin_render_pass(&RenderPassDescriptor {
+            label: Some("render_pass_debug_compositor"),
+            color_attachments: &[Some(RenderPassColorAttachment {
+                view: &output_view,
+                resolve_target: None,
+                ops: Operations {
+                    load: LoadOp::Load,
+                    store: StoreOp::Store,
+                },
+            })],
+            depth_stencil_attachment: None,
+            timestamp_writes: None,
+            occlusion_query_set: None,
+        });
+
+        debug_compositor.render(render_pass, &window, &render_context);
     }
 
     context.queue.submit(Some(command_encoder.finish()));

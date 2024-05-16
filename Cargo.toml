@@ -12,6 +12,11 @@ winit = { version = "0.30.0", default-features = false, features = [ "rwh_06", "
 # Rendering
 wgpu = { version = "0.20.0", default-features = false, features = [ "dx12", "wgsl" ] }
 
+# GUI
+imgui = { path = "./imgui-rs/imgui" }
+imgui-wgpu = { path = "./imgui-wgpu" }
+imgui-winit-support = { path = "./imgui-rs/imgui-winit-support" }
+
 # Math
 nalgebra = "0.32.5"
 fastnoise-lite = "1.1.1"

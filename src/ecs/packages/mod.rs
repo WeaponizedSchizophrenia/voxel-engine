@@ -3,6 +3,7 @@ use crate::application::Application;
 pub mod camera_controller;
 pub mod chunk;
 pub mod config;
+pub mod debug_gui;
 pub mod generator;
 pub mod input_provider;
 pub mod pipeline_server;

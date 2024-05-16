@@ -17,6 +17,7 @@ use winit::{
 use crate::{
     ecs::{
         events::{
+            self,
             window_events::{self, KeyboardInput, MouseButtonInput, MouseMoved},
             WindowRenderRequested, WindowResized,
         },
@@ -41,7 +42,6 @@ impl Application {
     pub fn new() -> anyhow::Result<Self> {
         let mut world = World::default();
 
-        // Todo: Removes the systems from the schedule declarations.
         world.add_schedule(Schedule::new(Init));
         world.add_schedule(Schedule::new(WindowInit));
         world.add_schedule(Schedule::new(EarlyUpdate));
@@ -77,6 +77,11 @@ impl Application {
     /// Inserts the given `resource` into the world.
     pub fn insert_resource<T: Resource>(&mut self, resource: T) {
         self.world.insert_resource(resource);
+    }
+
+    /// Inserts the given non send `resource` into the world.
+    pub fn insert_non_send_resource<T: 'static>(&mut self, resource: T) {
+        self.world.insert_non_send_resource(resource);
     }
 
     /// Spawns an entity with the provided `components`.
@@ -143,10 +148,11 @@ impl Application {
             }
 
             WindowEvent::KeyboardInput {
-                event: key_event, ..
+                event: ref key_event,
+                ..
             } => {
                 self.world
-                    .send_event_and_notify(KeyboardInput::from(key_event));
+                    .send_event_and_notify(KeyboardInput::from(key_event.clone()));
             }
 
             WindowEvent::CursorMoved { position, .. } => {
@@ -160,6 +166,9 @@ impl Application {
 
             _ => {}
         }
+
+        self.world
+            .send_event_and_notify(events::window_events::WindowEvent(event));
 
         self.world.run_schedule(EarlyUpdate);
         self.world.run_schedule(Update);

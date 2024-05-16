@@ -27,6 +27,12 @@ impl Time {
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DeltaTime(pub(super) Duration);
 
+impl From<DeltaTime> for Duration {
+    fn from(value: DeltaTime) -> Self {
+        value.0
+    }
+}
+
 impl DeltaTime {
     /// Returns the delta time in seconds.
     pub fn get_seconds(&self) -> f32 {

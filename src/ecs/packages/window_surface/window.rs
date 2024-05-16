@@ -13,6 +13,12 @@ impl From<WinitWindow> for Window {
     }
 }
 
+impl AsRef<WinitWindow> for Window {
+    fn as_ref(&self) -> &WinitWindow {
+        &self.0
+    }
+}
+
 impl Window {
     /// Creates a new `Window` from a winit window.
     pub fn new(window: WinitWindow) -> Self {

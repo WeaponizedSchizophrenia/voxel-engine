@@ -8,6 +8,10 @@ use winit::{
 
 use crate::utils::bevy::WorldExtensions;
 
+/// `winit::event::WindowEvent` wrapper for the bevy ecs.
+#[derive(Event, Clone, PartialEq, Debug)]
+pub struct WindowEvent(pub winit::event::WindowEvent);
+
 /// Window resized event, contains the new width and height.
 #[derive(Event, Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct WindowResized {
@@ -86,6 +90,7 @@ pub struct MouseButtonInput {
 
 /// Registers all the window events to the provided `World`.
 pub fn register_window_events(world: &mut World) {
+    world.add_event::<WindowEvent>();
     world.add_event::<WindowResized>();
     world.add_event::<WindowRenderRequested>();
     world.add_event::<KeyboardInput>();
