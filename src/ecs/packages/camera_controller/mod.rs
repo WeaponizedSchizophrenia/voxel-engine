@@ -2,8 +2,9 @@ use bevy_ecs::{
     event::EventReader,
     query::{Changed, With},
     schedule::IntoSystemConfigs as _,
-    system::{Query, Res},
+    system::{NonSend, Query, Res},
 };
+use imgui::TreeNodeFlags;
 use nalgebra::{point, vector, Matrix3, Vector3};
 use winit::{event::MouseButton, keyboard::KeyCode};
 
@@ -17,12 +18,7 @@ use crate::ecs::{
 pub use self::component::{CameraController, CurrentCameraController};
 
 use super::{
-    config::Config,
-    input_provider::{self, InputProvider},
-    render_init::RenderContext,
-    time::Time,
-    window_surface::Window,
-    Package,
+    config::Config, debug_gui::{self, DebugCompositor}, input_provider::{self, InputProvider}, render_init::RenderContext, time::Time, window_surface::Window, Package
 };
 
 mod component;
@@ -63,14 +59,35 @@ impl Package for CameraControllerPackage {
                 mouse_motion_listener_system.after(input_provider::mouse_moved_listener_system),
             ),
         );
-        // app.add_systems(Update, update_system);
-        app.add_systems(Render, update_camera_system.before(systems::render_system));
+        app.add_systems(Render, (
+            update_camera_system.before(systems::render_system),
+            controller_debug_gui.before(systems::render_system)
+                .after(debug_gui::start_gui_frame)
+        ));
     }
 
     fn intialization_stage(&self) -> super::InitializationStage {
         // The camera controller needs to be initialized after the window because the projection
         // matrix needs the aspect ratio of the window.
         super::InitializationStage::WindowInit
+    }
+}
+
+fn controller_debug_gui(
+    mut camera_controllers: Query<&mut CameraController>,
+    debug_compositor: Option<NonSend<DebugCompositor>>,
+) {
+    if let Some(debug_compositor) = debug_compositor {
+        let ui = debug_compositor.get_frame_ui();
+        ui.window("Camera controllers")
+            .build(|| {
+                for (i, mut controller) in camera_controllers.iter_mut().enumerate() {
+                    if ui.collapsing_header(&format!("Camera controller {i}"), TreeNodeFlags::DEFAULT_OPEN) {
+                        ui.input_float("Speed", &mut controller.speed)
+                            .build();
+                    }
+                }
+            });
     }
 }
 

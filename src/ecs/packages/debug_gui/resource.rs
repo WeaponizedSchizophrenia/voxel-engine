@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use imgui::{Context, FontConfig, FontSource};
+use imgui::{Context, FontConfig, FontSource, Ui};
 use imgui_wgpu::{Renderer, RendererConfig};
 use imgui_winit_support::{HiDpiMode, WinitPlatform};
 use wgpu::{RenderPass, TextureFormat};
@@ -15,6 +15,7 @@ pub struct DebugCompositor {
     context: Context,
     platform: WinitPlatform,
     renderer: Renderer,
+    ui: Option<*mut Ui>,
 }
 
 impl DebugCompositor {
@@ -53,6 +54,7 @@ impl DebugCompositor {
             context,
             platform,
             renderer,
+            ui: None,
         }
     }
 
@@ -71,22 +73,29 @@ impl DebugCompositor {
             return;
         }
 
-        self.build_gui();
-
-        if let Err(e) = self.renderer.render(
-            self.context.render(),
-            &render_context.queue,
-            &render_context.device,
-            &mut render_pass,
-        ) {
-            log::error!("Failed to render imgui frame: {e}");
+        if let Some(_) = self.ui {
+            if let Err(e) = self.renderer.render(
+                self.context.render(),
+                &render_context.queue,
+                &render_context.device,
+                &mut render_pass,
+            ) {
+                log::error!("Failed to render imgui frame: {e}");
+            }
         }
     }
 
-    /// Builds the gui.
-    fn build_gui(&mut self) {
-        let ui = self.context.frame();
-        ui.show_demo_window(&mut true)
+    /// Starts a new imgui frame.
+    pub fn start_frame(&mut self) {
+        self.ui = Some(self.context.new_frame());
+    }
+
+    /// Gets a reference to the imgui ui.
+    /// 
+    /// ## Panics
+    /// If this is called before `start_frame` and after `render`.
+    pub fn get_frame_ui(&self) -> &Ui {
+        unsafe { &*self.ui.unwrap() }
     }
 
     /// Updates the delta time.

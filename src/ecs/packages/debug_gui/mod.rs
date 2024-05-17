@@ -1,6 +1,6 @@
 use crate::{
     application::Application,
-    ecs::{events::window_events::WindowEvent, schedules::Update},
+    ecs::{events::window_events::WindowEvent, schedules::{Render, Update}, systems},
 };
 
 use super::{
@@ -9,8 +9,7 @@ use super::{
 
 mod resource;
 use bevy_ecs::{
-    event::EventReader,
-    system::{NonSendMut, Res},
+    event::EventReader, schedule::IntoSystemConfigs as _, system::{NonSendMut, Res}
 };
 pub use resource::DebugCompositor;
 
@@ -36,6 +35,7 @@ impl Package for DebugCompositorPackage {
 
         app.insert_non_send_resource(DebugCompositor::new(&window, &render_context));
         app.add_systems(Update, update_gui);
+        app.add_systems(Render, start_gui_frame.before(systems::render_system));
     }
 
     fn intialization_stage(&self) -> InitializationStage {
@@ -55,4 +55,10 @@ pub fn update_gui(
     for event in window_events.read() {
         debug_compositor.handle_event(&window, event);
     }
+}
+
+pub fn start_gui_frame(
+    mut debug_compositor: NonSendMut<DebugCompositor>,
+) {
+    debug_compositor.start_frame();
 }
