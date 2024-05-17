@@ -103,6 +103,7 @@ fn mouse_motion_listener_system(
 fn window_event_listener_system(
     mut events: EventReader<ecs::events::window_events::WindowEvent>,
     mut camera_controllers: Query<(&mut CameraController, Option<&CurrentCameraController>)>,
+    config: Res<Config>,
 ) {
     for event in events.read() {
         match event.0 {
@@ -112,10 +113,10 @@ fn window_event_listener_system(
                 {
                     match delta {
                         winit::event::MouseScrollDelta::LineDelta(_, y) => {
-                            controller.speed += y;
+                            controller.speed += y * config.camera_speed_change_step;
                         }
                         winit::event::MouseScrollDelta::PixelDelta(d) => {
-                            controller.speed += d.y as f32;
+                            controller.speed += d.y as f32 * config.camera_speed_change_step;
                         }
                     }
                 }

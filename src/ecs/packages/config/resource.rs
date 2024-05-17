@@ -6,10 +6,12 @@ use serde::{Deserialize, Serialize};
 pub struct Config {
     /// The mouse sensitivity.
     pub sensitivity: f32,
+    /// How fast should the camera speed change while scrolling.
+    pub camera_speed_change_step: f32,
 }
 
 impl Default for Config {
     fn default() -> Self {
-        Self { sensitivity: 0.005 }
+        Self { sensitivity: 0.005, camera_speed_change_step: 10.0 }
     }
 }
