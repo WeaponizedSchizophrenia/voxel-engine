@@ -43,18 +43,10 @@ impl Package for CameraControllerPackage {
                 return;
             }
         };
-        let config = match app.get_resource::<Config>() {
-            Some(cfg) => cfg,
-            None => {
-                log::error!("Failed to get config");
-                return;
-            }
-        };
 
         let camera_controller = CameraController {
             position: point![0.0, 1.0, 4.0],
             aspect_ratio: window.get_aspect_ratio(),
-            sensitivity: config.sensitivity,
             ..Default::default()
         };
 
@@ -85,11 +77,12 @@ fn mouse_motion_listener_system(
     mut events: EventReader<MouseMotion>,
     mut camera_controllers: Query<&mut CameraController>,
     input_provider: Res<InputProvider>,
+    config: Res<Config>,
 ) {
     if input_provider.is_mouse_button_pressed(MouseButton::Right) {
         for event in events.read() {
             for mut controller in camera_controllers.iter_mut() {
-                let delta = event.delta * controller.sensitivity;
+                let delta = event.delta * config.sensitivity;
 
                 controller.pitch += delta.y;
                 controller.yaw -= delta.x;

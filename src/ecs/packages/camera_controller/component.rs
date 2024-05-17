@@ -12,8 +12,6 @@ pub struct CurrentCameraController;
 pub struct CameraController {
     /// The movement speed of the camera controller.
     pub speed: f32,
-    /// The mouse sensitivity of the camera controller.
-    pub sensitivity: f32,
     /// The position of the camera in world space.
     pub position: Point3<f32>,
     /// The aspect ratio of the camera.
@@ -30,7 +28,6 @@ impl Default for CameraController {
     fn default() -> Self {
         Self {
             speed: 50.0,
-            sensitivity: 0.001,
             position: Default::default(),
             aspect_ratio: 16.0 / 9.0,
             fov: std::f32::consts::FRAC_PI_3,
