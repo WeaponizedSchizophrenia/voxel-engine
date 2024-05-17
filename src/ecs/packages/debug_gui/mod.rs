@@ -1,6 +1,10 @@
 use crate::{
     application::Application,
-    ecs::{events::window_events::WindowEvent, schedules::{Render, Update}, systems},
+    ecs::{
+        events::window_events::WindowEvent,
+        schedules::{Render, Update},
+        systems,
+    },
 };
 
 use super::{
@@ -9,7 +13,9 @@ use super::{
 
 mod resource;
 use bevy_ecs::{
-    event::EventReader, schedule::IntoSystemConfigs as _, system::{NonSendMut, Res}
+    event::EventReader,
+    schedule::IntoSystemConfigs as _,
+    system::{NonSendMut, Res},
 };
 pub use resource::DebugCompositor;
 
@@ -57,8 +63,6 @@ pub fn update_gui(
     }
 }
 
-pub fn start_gui_frame(
-    mut debug_compositor: NonSendMut<DebugCompositor>,
-) {
+pub fn start_gui_frame(mut debug_compositor: NonSendMut<DebugCompositor>) {
     debug_compositor.start_frame();
 }

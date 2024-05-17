@@ -73,7 +73,7 @@ impl DebugCompositor {
             return;
         }
 
-        if let Some(_) = self.ui {
+        if self.ui.is_some() {
             if let Err(e) = self.renderer.render(
                 self.context.render(),
                 &render_context.queue,
@@ -91,9 +91,10 @@ impl DebugCompositor {
     }
 
     /// Gets a reference to the imgui ui.
-    /// 
+    ///
     /// ## Panics
     /// If this is called before `start_frame` and after `render`.
+    #[allow(unused)]
     pub fn get_frame_ui(&self) -> &Ui {
         unsafe { &*self.ui.unwrap() }
     }

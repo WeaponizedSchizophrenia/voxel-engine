@@ -2,14 +2,17 @@ use bevy_ecs::{
     event::EventReader,
     query::{Changed, With},
     schedule::IntoSystemConfigs as _,
-    system::{NonSend, Query, Res},
+    system::{Query, Res},
 };
-use imgui::TreeNodeFlags;
 use nalgebra::{point, vector, Matrix3, Vector3};
-use winit::{event::MouseButton, keyboard::KeyCode};
+use winit::{
+    event::{MouseButton, WindowEvent},
+    keyboard::KeyCode,
+};
 
 use crate::ecs::{
-    events::{window_events::MouseMotion, WindowResized},
+    self,
+    events::window_events::MouseMotion,
     resources::Camera,
     schedules::{Render, SentWindowEvent},
     systems,
@@ -18,7 +21,12 @@ use crate::ecs::{
 pub use self::component::{CameraController, CurrentCameraController};
 
 use super::{
-    config::Config, debug_gui::{self, DebugCompositor}, input_provider::{self, InputProvider}, render_init::RenderContext, time::Time, window_surface::Window, Package
+    config::Config,
+    input_provider::{self, InputProvider},
+    render_init::RenderContext,
+    time::Time,
+    window_surface::Window,
+    Package,
 };
 
 mod component;
@@ -55,39 +63,20 @@ impl Package for CameraControllerPackage {
             SentWindowEvent,
             (
                 update_system,
-                resize_listener_system,
+                window_event_listener_system,
                 mouse_motion_listener_system.after(input_provider::mouse_moved_listener_system),
             ),
         );
-        app.add_systems(Render, (
-            update_camera_system.before(systems::render_system),
-            controller_debug_gui.before(systems::render_system)
-                .after(debug_gui::start_gui_frame)
-        ));
+        app.add_systems(
+            Render,
+            (update_camera_system.before(systems::render_system),),
+        );
     }
 
     fn intialization_stage(&self) -> super::InitializationStage {
         // The camera controller needs to be initialized after the window because the projection
         // matrix needs the aspect ratio of the window.
         super::InitializationStage::WindowInit
-    }
-}
-
-fn controller_debug_gui(
-    mut camera_controllers: Query<&mut CameraController>,
-    debug_compositor: Option<NonSend<DebugCompositor>>,
-) {
-    if let Some(debug_compositor) = debug_compositor {
-        let ui = debug_compositor.get_frame_ui();
-        ui.window("Camera controllers")
-            .build(|| {
-                for (i, mut controller) in camera_controllers.iter_mut().enumerate() {
-                    if ui.collapsing_header(&format!("Camera controller {i}"), TreeNodeFlags::DEFAULT_OPEN) {
-                        ui.input_float("Speed", &mut controller.speed)
-                            .build();
-                    }
-                }
-            });
     }
 }
 
@@ -108,6 +97,36 @@ fn mouse_motion_listener_system(
         }
     } else {
         events.clear();
+    }
+}
+
+fn window_event_listener_system(
+    mut events: EventReader<ecs::events::window_events::WindowEvent>,
+    mut camera_controllers: Query<(&mut CameraController, Option<&CurrentCameraController>)>,
+) {
+    for event in events.read() {
+        match event.0 {
+            WindowEvent::MouseWheel { delta, .. } => {
+                if let Some((mut controller, _)) =
+                    camera_controllers.iter_mut().find(|(_, c)| c.is_some())
+                {
+                    match delta {
+                        winit::event::MouseScrollDelta::LineDelta(_, y) => {
+                            controller.speed += y;
+                        }
+                        winit::event::MouseScrollDelta::PixelDelta(d) => {
+                            controller.speed += d.y as f32;
+                        }
+                    }
+                }
+            }
+            WindowEvent::Resized(new_size) => {
+                for (mut controller, _) in camera_controllers.iter_mut() {
+                    controller.aspect_ratio = new_size.width as f32 / new_size.height as f32;
+                }
+            }
+            _ => {}
+        }
     }
 }
 
@@ -157,18 +176,6 @@ fn update_system(
         ]);
         let speed = controller.speed;
         controller.position += relative_matrix * input_vector * speed * delta_time;
-    }
-}
-
-/// Listens for window resize events and updates the aspect ratio of the camera controller.
-fn resize_listener_system(
-    mut events: EventReader<WindowResized>,
-    mut camera_controllers: Query<&mut CameraController>,
-) {
-    for event in events.read() {
-        for mut controller in camera_controllers.iter_mut() {
-            controller.aspect_ratio = event.new_width as f32 / event.new_height as f32;
-        }
     }
 }
 
