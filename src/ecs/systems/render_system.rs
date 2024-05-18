@@ -8,11 +8,7 @@ use crate::{
     ecs::{
         components::{Geometry, RenderDescriptor},
         packages::{
-            debug_gui::DebugCompositor,
-            pipeline_server::PipelineServer,
-            render_init::RenderContext,
-            voxel_registry::VoxelRegistry,
-            window_surface::{Window, WindowRenderSurface},
+            debug_gui::DebugCompositor, game_world::GameWorld, pipeline_server::PipelineServer, render_init::RenderContext, voxel_registry::VoxelRegistry, window_surface::{Window, WindowRenderSurface}
         },
         resources::Camera,
     },
@@ -27,6 +23,7 @@ pub fn render_system(
     context: Res<RenderContext>,
     camera: Res<Camera>,
     voxel_textures: Res<VoxelRegistry>,
+    game_world: Res<GameWorld>,
     window: Res<Window>,
     render_context: Res<RenderContext>,
     mut debug_compositor: Option<NonSendMut<DebugCompositor>>,
@@ -65,12 +62,13 @@ pub fn render_system(
 
         camera.bind_to_render_pass(&mut render_pass);
         voxel_textures.bind_to_renderpass(&mut render_pass);
+        game_world.bind_to_render_pass(&mut render_pass);
 
         for (desc, geometry) in render_query.iter() {
-            let pipeline = match pipeline_server.get_pipeline(desc.get_pipeline_name()) {
+            let pipeline = match pipeline_server.get_pipeline(&desc.pipeline_name) {
                 Some(pipeline) => pipeline,
                 None => {
-                    log::error!("Could not find pipeline {}", desc.get_pipeline_name());
+                    log::error!("Could not find pipeline {}", desc.pipeline_name);
                     continue;
                 }
             };

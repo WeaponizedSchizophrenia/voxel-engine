@@ -4,17 +4,9 @@ use bevy_ecs::component::Component;
 #[derive(Component, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct RenderDescriptor {
     /// The name of the pipeline that should be used.
-    pipeline_name: String,
-}
-
-impl RenderDescriptor {
-    /// Creates a new `RenderDescriptor`.
-    pub fn new(pipeline_name: String) -> Self {
-        Self { pipeline_name }
-    }
-
-    /// Returns the name of the pipeline that should be used.
-    pub fn get_pipeline_name(&self) -> &str {
-        &self.pipeline_name
-    }
+    pub pipeline_name: String,
+    /// The names of the bind groups that should be used.
+    /// Note: The array has a fixed length of 4 because the max number
+    /// of bind groups in a pipeline can have in wgpu is 4.
+    pub bind_group_names: [Option<String>; 4],
 }

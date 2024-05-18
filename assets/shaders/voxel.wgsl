@@ -3,6 +3,11 @@ struct Camera {
     position: vec4f,
 };
 
+struct World {
+    sun_direction: vec3f,
+    ambient_light: f32,
+}
+
 @group(0) @binding(0)
 var<uniform> camera: Camera;
 
@@ -10,6 +15,9 @@ var<uniform> camera: Camera;
 var voxel_textures: texture_2d_array<f32>;
 @group(1) @binding(1)
 var voxel_sampler: sampler;
+
+@group(2) @binding(0)
+var<uniform> world: World;
 
 struct VertexInput {
     @location(0) position: vec3f,
@@ -71,11 +79,16 @@ fn voxel_fragment(in: VertexOutput) -> FragmentOutput {
         -in.tex_coords, 
         get_texture_index(in.normal, in.texture_index)
     );
+    let brightness = get_brightness(in.normal);
 
     // out.color = vec4<f32>(modulo(in.tex_coords.x, 1.0), modulo(in.tex_coords.y, 1.0), 1.0, 1.0);
-    out.color = texture_color;
+    out.color = brightness * texture_color;
 
     return out;
+}
+
+fn get_brightness(normal: vec3f) -> f32 {
+    return max(dot(normal, -world.sun_direction), world.ambient_light);
 }
 
 fn modulo(x: f32, y: f32) -> f32 {

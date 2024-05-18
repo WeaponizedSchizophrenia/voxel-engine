@@ -11,6 +11,7 @@ pub mod render_init;
 pub mod time;
 pub mod voxel_registry;
 pub mod window_surface;
+pub mod game_world;
 
 /// The initialization stage of a package.
 pub enum InitializationStage {
