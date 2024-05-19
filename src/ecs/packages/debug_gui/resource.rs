@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use imgui::{Context, FontConfig, FontSource, Ui};
+use imgui::{Context, FontConfig, FontSource, Style, Ui};
 use imgui_wgpu::{Renderer, RendererConfig};
 use imgui_winit_support::{HiDpiMode, WinitPlatform};
 use wgpu::{RenderPass, TextureFormat};
@@ -22,6 +22,7 @@ impl DebugCompositor {
     /// Creates a new `DebugCompositor`.
     pub fn new(window: &Window, render_context: &RenderContext) -> Self {
         let mut context = Context::create();
+        apply_style(context.style_mut());
         let mut platform = WinitPlatform::init(&mut context);
 
         platform.attach_window(context.io_mut(), window.as_ref(), HiDpiMode::Default);
@@ -110,4 +111,8 @@ impl DebugCompositor {
         self.platform
             .handle_event(self.context.io_mut(), window.as_ref(), &event.0);
     }
+}
+
+fn apply_style(style: &mut Style) {
+    style.window_rounding = 5.0;
 }
