@@ -61,6 +61,10 @@ impl GBuffer {
                 },
                 BindGroupEntry {
                     binding: 3,
+                    resource: BindingResource::TextureView(&depth_texture.view),
+                },
+                BindGroupEntry {
+                    binding: 4,
                     resource: BindingResource::Sampler(&sampler),
                 },
             ],
@@ -78,5 +82,13 @@ impl GBuffer {
 
     pub fn bind_to_render_pass<'rp, 's: 'rp>(&'s self, renderpass: &mut RenderPass<'rp>) {
         renderpass.set_bind_group(1, &self.bind_group, &[]);
+    }
+
+    #[allow(unused)]
+    pub fn resize(&mut self, device: &Device, width: u32, height: u32) {
+        let _ = height;
+        let _ = width;
+        let _ = device;
+        unimplemented!()
     }
 }
