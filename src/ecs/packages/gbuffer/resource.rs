@@ -85,10 +85,13 @@ impl GBuffer {
     }
 
     #[allow(unused)]
-    pub fn resize(&mut self, device: &Device, width: u32, height: u32) {
-        let _ = height;
-        let _ = width;
-        let _ = device;
-        unimplemented!()
+    pub fn resize(
+        &mut self,
+        device: &Device,
+        bind_group_layout: &BindGroupLayout,
+        width: u32,
+        height: u32,
+    ) {
+        *self = Self::new(device, width, height, bind_group_layout);
     }
 }

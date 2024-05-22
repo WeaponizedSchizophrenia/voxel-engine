@@ -4,7 +4,10 @@ use std::{fs::File, io::BufWriter};
 
 use bevy_ecs::system::{NonSendMut, Query, Res};
 use wgpu::{
-    BufferDescriptor, BufferUsages, Color, CommandEncoderDescriptor, Extent3d, ImageCopyBuffer, ImageCopyBufferBase, ImageCopyTexture, ImageCopyTextureBase, ImageDataLayout, LoadOp, Operations, Origin3d, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, StoreOp
+    BufferDescriptor, BufferUsages, Color, CommandEncoderDescriptor, Extent3d, ImageCopyBuffer,
+    ImageCopyBufferBase, ImageCopyTexture, ImageCopyTextureBase, ImageDataLayout, LoadOp,
+    Operations, Origin3d, RenderPassColorAttachment, RenderPassDepthStencilAttachment,
+    RenderPassDescriptor, StoreOp,
 };
 
 use crate::{
@@ -47,7 +50,6 @@ pub fn render_system(
         .create_command_encoder(&CommandEncoderDescriptor {
             label: Some("command_encoder"),
         });
-
 
     // Geometry pass
     {
@@ -136,7 +138,7 @@ pub fn render_system(
     //         depth_or_array_layers: 1,
     //     },
     // );
-    
+
     // let data = albedo_buffer.slice(..).get_mapped_range().to_vec();
     // if let Err(e) = image::write_buffer_with_format(
     //     &mut BufWriter::new(File::create("./assets/test.png").unwrap()),

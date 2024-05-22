@@ -1,7 +1,7 @@
 use wgpu::{
-    BindGroupLayout, DepthStencilState, Device, Face, FragmentState,
-    FrontFace, MultisampleState, PipelineCompilationOptions, PipelineLayoutDescriptor, PolygonMode,
-    PrimitiveState, PrimitiveTopology, RenderPass, RenderPipeline, RenderPipelineDescriptor,
+    BindGroupLayout, DepthStencilState, Device, Face, FragmentState, FrontFace, MultisampleState,
+    PipelineCompilationOptions, PipelineLayoutDescriptor, PolygonMode, PrimitiveState,
+    PrimitiveTopology, RenderPass, RenderPipeline, RenderPipelineDescriptor,
     ShaderModuleDescriptor, ShaderSource, TextureFormat, VertexState,
 };
 
