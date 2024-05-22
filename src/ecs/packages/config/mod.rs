@@ -72,7 +72,7 @@ fn config_debug_gui(
     if let Some(debug_compositor) = debug_compositor {
         let ui = debug_compositor.get_frame_ui();
 
-        // TODO: Fix this: 
+        // TODO: Fix this:
         // This is a bad idea:
         ui.main_menu_bar(|| {
             ui.menu("Windows", || {
@@ -84,9 +84,7 @@ fn config_debug_gui(
 
         if config.config_window_open {
             let mut open = config.config_window_open;
-            ui.window("Config")
-                .opened(&mut open)
-                .build(|| {
+            ui.window("Config").opened(&mut open).build(|| {
                 if ui.slider("Sensitivity", 0.0001, 1.0, &mut config.sensitivity) {
                     save_config(&config);
                 }
@@ -106,6 +104,5 @@ fn config_debug_gui(
             });
             config.config_window_open = open;
         }
-
     }
 }

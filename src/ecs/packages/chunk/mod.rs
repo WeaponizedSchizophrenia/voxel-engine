@@ -48,7 +48,6 @@ pub fn chunk_mesher_system(
 
     let voxel_render_descriptor = RenderDescriptor {
         pipeline_name: "voxel".to_owned(),
-        bind_group_names: [None, None, None, None],
     };
     let start = Instant::now();
 

@@ -16,7 +16,7 @@ pub struct VoxelRegistry {
 
 impl VoxelRegistry {
     /// Binds the voxel texture array to the render pass;
-    pub fn bind_to_renderpass<'rp, 's: 'rp>(&'s self, render_pass: &mut RenderPass<'rp>) {
+    pub fn bind_to_render_pass<'rp, 's: 'rp>(&'s self, render_pass: &mut RenderPass<'rp>) {
         render_pass.set_bind_group(1, &self.bind_group, &[]);
     }
 }

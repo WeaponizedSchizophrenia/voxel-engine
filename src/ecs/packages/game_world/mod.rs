@@ -1,9 +1,20 @@
-use crate::{ecs::{schedules::Render, systems}, rendering::pipelines::Pipeline};
+use crate::{
+    ecs::{schedules::Render, systems},
+    rendering::pipelines::Pipeline,
+};
 
-use super::{debug_gui::{self, DebugCompositor}, pipeline_server::PipelineServer, render_init::RenderContext, Package};
+use super::{
+    debug_gui::{self, DebugCompositor},
+    pipeline_server::PipelineServer,
+    render_init::RenderContext,
+    Package,
+};
 
 mod resource;
-use bevy_ecs::{schedule::IntoSystemConfigs, system::{NonSend, Res, ResMut, Resource}};
+use bevy_ecs::{
+    schedule::IntoSystemConfigs,
+    system::{NonSend, Res, ResMut, Resource},
+};
 pub use resource::GameWorld;
 
 pub struct GameWorldPackage;
@@ -24,28 +35,33 @@ impl Package for GameWorldPackage {
                 return;
             }
         };
-        let voxel_pipeline = match pipeline_server.get_pipeline("voxel").map(AsRef::as_ref) {
-            Some(Pipeline::Voxel(voxel_pipeline)) => voxel_pipeline,
+        let lighting_pipeline = match pipeline_server.get_pipeline("lighting").map(AsRef::as_ref) {
+            Some(Pipeline::Lighting(pipeline)) => pipeline,
             _ => {
-                log::error!("Failed to get voxel pipeline");
+                log::error!("Failed to get lighting pipeline");
                 return;
             }
         };
 
-        let game_world = GameWorld::new(&render_context.device, &voxel_pipeline.world_bind_group_layout);
+        let game_world = GameWorld::new(
+            &render_context.device,
+            &lighting_pipeline.world_bind_group_layout,
+        );
 
         app.insert_resource(game_world);
         app.insert_resource(GameWorldDebuGuiState::default());
-        app.add_systems(Render, 
-            game_world_debug_gui.after(debug_gui::start_gui_frame)
-                .before(systems::render_system)
+        app.add_systems(
+            Render,
+            game_world_debug_gui
+                .after(debug_gui::start_gui_frame)
+                .before(systems::render_system),
         );
     }
 }
 
 #[derive(Resource, Default)]
 struct GameWorldDebuGuiState {
-    open: bool
+    open: bool,
 }
 
 fn game_world_debug_gui(
@@ -67,28 +83,24 @@ fn game_world_debug_gui(
 
         if state.open {
             let mut open = state.open;
-            ui.window("Game World")
-                .opened(&mut open)
-                .build(|| {
-                    if ui.slider_config(
-                        "Sun direction",
-                        -1.0,
-                        1.0
-                    ).build_array(game_world.sun_direction.as_mut_slice()) {
-                        game_world.sun_direction = game_world.sun_direction.normalize();
-                        game_world.update_uniform(&render_context.queue);
-                    }
-                    if ui.slider(
-                        "Ambient light ammount",
-                        0.0,
-                        1.0,
-                        &mut game_world.ambient_light
-                    ) {
-                        game_world.update_uniform(&render_context.queue);
-                    }
-                });
+            ui.window("Game World").opened(&mut open).build(|| {
+                if ui
+                    .slider_config("Sun direction", -1.0, 1.0)
+                    .build_array(game_world.sun_direction.as_mut_slice())
+                {
+                    game_world.sun_direction = game_world.sun_direction.normalize();
+                    game_world.update_uniform(&render_context.queue);
+                }
+                if ui.slider(
+                    "Ambient light ammount",
+                    0.0,
+                    1.0,
+                    &mut game_world.ambient_light,
+                ) {
+                    game_world.update_uniform(&render_context.queue);
+                }
+            });
             state.open = open;
         }
-
     }
 }

@@ -1,7 +1,10 @@
+pub mod lighting_pipeline;
 pub mod voxel_pipeline;
 use enum_dispatch::enum_dispatch;
 pub use voxel_pipeline::VoxelPipeline;
 use wgpu::RenderPass;
+
+use self::lighting_pipeline::LightingPipeline;
 
 #[enum_dispatch]
 pub trait PipelineTrait {
@@ -13,4 +16,5 @@ pub trait PipelineTrait {
 #[enum_dispatch(PipelineTrait)]
 pub enum Pipeline {
     Voxel(VoxelPipeline),
+    Lighting(LightingPipeline),
 }

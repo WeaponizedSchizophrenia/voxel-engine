@@ -40,4 +40,8 @@ impl Window {
         let size = self.0.inner_size();
         size.width as f32 / size.height as f32
     }
+
+    pub fn get_size(&self) -> (u32, u32) {
+        self.0.inner_size().into()
+    }
 }

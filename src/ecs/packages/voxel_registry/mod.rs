@@ -188,7 +188,7 @@ impl Package for VoxelRegistryPackage {
             bind_group,
         };
 
-        let shader = match file_system::read_wgsl_shader("voxel") {
+        let shader = match file_system::read_wgsl_shader("voxel_geometry_pass") {
             Ok(shader) => shader,
             Err(e) => {
                 log::error!("{e}");

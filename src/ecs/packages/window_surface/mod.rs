@@ -16,7 +16,7 @@ use crate::{
             pipeline_server::PipelineServer,
             render_init::{GpuInstance, RenderContext},
         },
-        resources::Camera,
+        resources::{Camera, ScreenQuad},
         schedules::{SentWindowEvent, WindowInit},
     },
     rendering::pipelines::Pipeline,
@@ -65,7 +65,7 @@ impl Package for WindowSurfacePackage {
         };
         let voxel_pipeline = match pipeline_server.get_pipeline("voxel").map(AsRef::as_ref) {
             Some(Pipeline::Voxel(voxel)) => voxel,
-            None => {
+            _ => {
                 log::error!("Failed to get Voxel pipeline");
                 return;
             }
@@ -86,11 +86,14 @@ impl Package for WindowSurfacePackage {
                 }
             };
 
-        app.insert_resource(Camera::new(
+        let camera = Camera::new(
             &render_context.device,
             Default::default(),
             &voxel_pipeline.camera_bind_group_layout,
-        ));
+        );
+        let screen_quad = ScreenQuad::new(&render_context.device);
+        app.insert_resource(camera);
+        app.insert_resource(screen_quad);
         app.insert_resource(window);
         app.insert_resource(surface);
 

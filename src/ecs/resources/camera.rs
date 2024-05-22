@@ -11,7 +11,6 @@ use wgpu::{
 /// Camera resource this is used to render from the perspective of the user.
 #[derive(Resource)]
 pub struct Camera {
-    #[allow(unused)]
     uniform_buffer: Buffer,
     bind_group: BindGroup,
 }

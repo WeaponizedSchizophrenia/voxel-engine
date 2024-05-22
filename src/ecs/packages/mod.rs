@@ -4,6 +4,8 @@ pub mod camera_controller;
 pub mod chunk;
 pub mod config;
 pub mod debug_gui;
+pub mod game_world;
+pub mod gbuffer;
 pub mod generator;
 pub mod input_provider;
 pub mod pipeline_server;
@@ -11,7 +13,6 @@ pub mod render_init;
 pub mod time;
 pub mod voxel_registry;
 pub mod window_surface;
-pub mod game_world;
 
 /// The initialization stage of a package.
 pub enum InitializationStage {

@@ -2,13 +2,10 @@ use bevy_ecs::system::Resource;
 use thiserror::Error;
 use wgpu::{
     CreateSurfaceError, PresentMode, Surface, SurfaceConfiguration, SurfaceError, SurfaceTexture,
-    TextureUsages, TextureView,
+    TextureUsages,
 };
 
-use crate::{
-    ecs::packages::render_init::{GpuInstance, RenderContext},
-    rendering::{depth_texture, texture::Texture},
-};
+use crate::ecs::packages::render_init::{GpuInstance, RenderContext};
 
 use super::window::Window;
 
@@ -17,7 +14,6 @@ use super::window::Window;
 pub struct WindowRenderSurface {
     surface: Surface<'static>,
     surface_config: SurfaceConfiguration,
-    depth_texture: Texture,
 }
 
 /// An error that can occur when creating `RenderSurface`.
@@ -83,16 +79,9 @@ impl WindowRenderSurface {
 
         surface.configure(&context.device, &surface_config);
 
-        let depth_texture = depth_texture::create_depth_texture(
-            &context.device,
-            surface_config.width,
-            surface_config.height,
-        );
-
         Ok(Self {
             surface,
             surface_config,
-            depth_texture,
         })
     }
 
@@ -102,20 +91,10 @@ impl WindowRenderSurface {
 
         self.surface
             .configure(&context.device, &self.surface_config);
-
-        self.depth_texture = depth_texture::create_depth_texture(
-            &context.device,
-            self.surface_config.width,
-            self.surface_config.height,
-        );
     }
 
     /// Returns the surface's current texture.
     pub fn get_texture(&self) -> Result<SurfaceTexture, SurfaceError> {
         self.surface.get_current_texture()
-    }
-
-    pub fn get_depth_view(&self) -> &TextureView {
-        &self.depth_texture.view
     }
 }

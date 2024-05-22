@@ -3,8 +3,11 @@
 use bevy_ecs::system::Resource;
 use bytemuck::{Pod, Zeroable};
 use nalgebra::{vector, Vector3};
-use wgpu::{util::{BufferInitDescriptor, DeviceExt}, BindGroup, BindGroupDescriptor, BindGroupEntry, BindGroupLayout, Buffer, BufferUsages, Device, Queue, RenderPass};
-
+use wgpu::{
+    util::{BufferInitDescriptor, DeviceExt},
+    BindGroup, BindGroupDescriptor, BindGroupEntry, BindGroupLayout, Buffer, BufferUsages, Device,
+    Queue, RenderPass,
+};
 
 #[derive(Resource)]
 pub struct GameWorld {
@@ -29,13 +32,11 @@ impl GameWorld {
         });
         let bind_group = device.create_bind_group(&BindGroupDescriptor {
             label: Some("bindgroup_world"),
-            layout: &world_bind_group_layout,
-            entries: &[
-                BindGroupEntry {
-                    binding: 0,
-                    resource: uniform_buffer.as_entire_binding(),
-                }
-            ],
+            layout: world_bind_group_layout,
+            entries: &[BindGroupEntry {
+                binding: 0,
+                resource: uniform_buffer.as_entire_binding(),
+            }],
         });
 
         Self {

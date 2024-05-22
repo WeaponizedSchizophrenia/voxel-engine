@@ -42,6 +42,6 @@ pub fn create_depth_texture(device: &Device, width: u32, height: u32) -> Texture
     Texture {
         texture,
         view,
-        sampler,
+        sampler: Some(sampler),
     }
 }

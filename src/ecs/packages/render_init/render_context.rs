@@ -1,5 +1,5 @@
 use bevy_ecs::system::Resource;
-use wgpu::{Device, DeviceDescriptor, Features, Queue, RequestDeviceError};
+use wgpu::{Device, DeviceDescriptor, Features, Limits, Queue, RequestDeviceError};
 
 use super::gpu_instance::GpuInstance;
 
@@ -18,8 +18,11 @@ impl RenderContext {
             .request_device(
                 &DeviceDescriptor {
                     label: Some("device"),
-                    required_features: Features::TEXTURE_BINDING_ARRAY,
-                    ..Default::default()
+                    required_features: Features::TEXTURE_BINDING_ARRAY
+                        | Features::POLYGON_MODE_LINE,
+                    required_limits: Limits {
+                        ..Default::default()
+                    },
                 },
                 None,
             )
