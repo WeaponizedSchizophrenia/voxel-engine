@@ -8,9 +8,6 @@ pub struct Config {
     pub sensitivity: f32,
     /// How fast should the camera speed change while scrolling.
     pub camera_speed_change_step: f32,
-
-    #[serde(skip)]
-    pub(super) config_window_open: bool,
 }
 
 impl Default for Config {
@@ -18,7 +15,6 @@ impl Default for Config {
         Self {
             sensitivity: 0.005,
             camera_speed_change_step: 10.0,
-            config_window_open: true,
         }
     }
 }

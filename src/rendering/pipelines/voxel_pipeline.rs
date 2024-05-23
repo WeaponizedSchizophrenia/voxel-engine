@@ -10,7 +10,7 @@ use crate::{
     rendering::{self, depth_texture, instance::Instance, vertex::Vertex},
 };
 
-/// A pipeline for rendering voxels.
+/// A pipeline for rendering voxels to a `GBuffer`.
 pub struct VoxelPipeline {
     pipeline: RenderPipeline,
     pub camera_bind_group_layout: BindGroupLayout,

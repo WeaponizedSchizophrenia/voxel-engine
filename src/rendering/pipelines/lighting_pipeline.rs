@@ -13,6 +13,7 @@ use crate::{
 
 use super::PipelineTrait;
 
+/// The pipeline that gets run at the lighting stage.
 pub struct LightingPipeline {
     pipeline: RenderPipeline,
     pub camera_bind_group_layout: BindGroupLayout,
@@ -27,6 +28,13 @@ impl PipelineTrait for LightingPipeline {
 }
 
 impl LightingPipeline {
+    /// Creates a new pipeline.
+    ///
+    /// ## Arguments
+    /// * `device` - The `wgpu::Device` to use for compiling.
+    /// * `vertex_src` - The vertex shader source code,
+    /// the shader should be very simple and just pass information along to the fragment shader.
+    /// * `fragment_src` - The fragment shader source code.
     pub fn new(device: &Device, vertex_src: &str, fragment_src: &str) -> Self {
         let vertex_shader_module = device.create_shader_module(ShaderModuleDescriptor {
             label: Some("shader_module_vertex_lighting"),

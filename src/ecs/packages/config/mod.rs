@@ -1,7 +1,7 @@
 mod resource;
 use bevy_ecs::{
     schedule::IntoSystemConfigs as _,
-    system::{NonSend, Res, ResMut},
+    system::{NonSend, Res, ResMut, Resource},
 };
 pub use resource::Config;
 
@@ -39,6 +39,7 @@ impl Package for ConfigPackage {
             .unwrap_or_default();
 
         app.insert_resource(config);
+        app.insert_resource(ConfigDebugGuiState::default());
         app.add_systems(Exit, save_config_system);
         app.add_systems(
             Render,
@@ -61,29 +62,30 @@ fn save_config(config: &Config) {
     };
 }
 
+/// The system that saves the `Config` resource.
 fn save_config_system(config: Res<Config>) {
     save_config(&config);
 }
 
+/// Builds the ui for adjusting the `Config` at run time.
 fn config_debug_gui(
     debug_compositor: Option<NonSend<DebugCompositor>>,
     mut config: ResMut<Config>,
+    mut state: ResMut<ConfigDebugGuiState>,
 ) {
     if let Some(debug_compositor) = debug_compositor {
         let ui = debug_compositor.get_frame_ui();
 
-        // TODO: Fix this:
-        // This is a bad idea:
         ui.main_menu_bar(|| {
             ui.menu("Windows", || {
                 if ui.menu_item("Config") {
-                    config.config_window_open = true;
+                    state.open = true;
                 }
             })
         });
 
-        if config.config_window_open {
-            let mut open = config.config_window_open;
+        if state.open {
+            let mut open = state.open;
             ui.window("Config").opened(&mut open).build(|| {
                 if ui.slider("Sensitivity", 0.0001, 1.0, &mut config.sensitivity) {
                     save_config(&config);
@@ -102,7 +104,13 @@ fn config_debug_gui(
                     );
                 }
             });
-            config.config_window_open = open;
+            state.open = open;
         }
     }
+}
+
+/// Singleton state for the config window.
+#[derive(Resource, Default)]
+struct ConfigDebugGuiState {
+    open: bool,
 }

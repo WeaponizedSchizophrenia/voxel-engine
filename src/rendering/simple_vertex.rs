@@ -4,7 +4,7 @@ use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
 use wgpu::{BufferAddress, VertexBufferLayout, VertexStepMode};
 
-/// 3D SimpleVertex type.
+/// A simple vertex with a 2D position.
 #[repr(C)]
 #[derive(Default, Clone, Copy, Debug, PartialEq, Pod, Zeroable, Serialize, Deserialize)]
 pub struct SimpleVertex {

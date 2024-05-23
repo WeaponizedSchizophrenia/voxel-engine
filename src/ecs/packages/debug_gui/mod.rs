@@ -63,6 +63,7 @@ pub fn update_gui(
     }
 }
 
+/// Starts the frame that the gui will be renderered to.
 pub fn start_gui_frame(mut debug_compositor: NonSendMut<DebugCompositor>) {
     debug_compositor.start_frame();
 }

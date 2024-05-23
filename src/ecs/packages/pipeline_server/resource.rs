@@ -17,7 +17,7 @@ impl PipelineServer {
     }
 
     /// Retrieves a pipeline by the provided name.
-    pub fn get_pipeline(&self, name: &str) -> Option<&Arc<Pipeline>> {
-        self.pipelines.get(name)
+    pub fn get_pipeline(&self, name: &str) -> Option<&Pipeline> {
+        self.pipelines.get(name).map(AsRef::as_ref)
     }
 }

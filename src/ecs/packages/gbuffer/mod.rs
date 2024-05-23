@@ -14,6 +14,7 @@ use bevy_ecs::{
 };
 pub use resource::GBuffer;
 
+/// Package for `GBuffer`.
 pub struct GBufferPackage;
 
 impl Package for GBufferPackage {
@@ -39,7 +40,7 @@ impl Package for GBufferPackage {
                 return;
             }
         };
-        let lighting_pipeline = match pipeline_server.get_pipeline("lighting").map(AsRef::as_ref) {
+        let lighting_pipeline = match pipeline_server.get_pipeline("lighting") {
             Some(Pipeline::Lighting(pipeline)) => pipeline,
             _ => {
                 log::error!("Could not get lighting pipeline");
@@ -72,7 +73,7 @@ pub fn resize_gbuffer_system(
 ) {
     // Get the last event so that we only resize once.
     if let Some(event) = resize_events.read().last() {
-        match pipeline_server.get_pipeline("lighting").map(AsRef::as_ref) {
+        match pipeline_server.get_pipeline("lighting") {
             Some(Pipeline::Lighting(pipeline)) => {
                 gbuffer.resize(
                     &render_context.device,

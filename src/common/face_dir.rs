@@ -38,16 +38,6 @@ impl FaceDir {
         }
     }
 
-    // TODO: IMPLEMENT
-    pub fn get_binormal(&self) -> Vector3<f32> {
-        unimplemented!()
-    }
-
-    // TODO: IMPLEMENT
-    pub fn get_tangent(&self) -> Vector3<f32> {
-        unimplemented!()
-    }
-
     /// Gets the sample position of the face direction.
     pub fn world_to_sample(&self, axis: i32, x: i32, y: i32) -> Vector3<i32> {
         match self {

@@ -58,6 +58,8 @@ pub enum VoxelTexture {
         /// The voxel textures are goint to be stored after each other so
         /// only the start index is required.
         #[serde(skip)]
+        // NOTE: This might become [u32; 3] instead for
+        // extra flexibility and memory efficiency in the actual texture array.
         array_index_start: Option<u32>,
     },
 }

@@ -113,6 +113,7 @@ impl DebugCompositor {
     }
 }
 
+/// Applies a UI style.
 fn apply_style(style: &mut Style) {
     style.window_rounding = 5.0;
 }

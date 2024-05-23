@@ -11,6 +11,7 @@ pub struct Texture {
 }
 
 impl Texture {
+    /// Creates an empty render target texture, without a sampler.
     pub fn new_empty_render_target(
         device: &Device,
         width: u32,

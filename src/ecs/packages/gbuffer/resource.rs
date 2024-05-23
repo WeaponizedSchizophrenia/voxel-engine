@@ -6,6 +6,7 @@ use wgpu::{
 
 use crate::rendering::{self, depth_texture, texture::Texture};
 
+/// Contains all the textures used in the GBuffer.
 #[derive(Resource)]
 pub struct GBuffer {
     pub depth_texture: Texture,
@@ -17,6 +18,7 @@ pub struct GBuffer {
 }
 
 impl GBuffer {
+    /// Creates a new `GBuffer` with the given size.
     pub fn new(
         device: &Device,
         width: u32,
@@ -80,11 +82,12 @@ impl GBuffer {
         }
     }
 
+    /// Binds the GBuffer to the given render pass.
     pub fn bind_to_render_pass<'rp, 's: 'rp>(&'s self, renderpass: &mut RenderPass<'rp>) {
         renderpass.set_bind_group(1, &self.bind_group, &[]);
     }
 
-    #[allow(unused)]
+    /// Resizes the GBuffer.
     pub fn resize(
         &mut self,
         device: &Device,

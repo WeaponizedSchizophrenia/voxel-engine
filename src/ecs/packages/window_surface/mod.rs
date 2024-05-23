@@ -63,7 +63,7 @@ impl Package for WindowSurfacePackage {
                 return;
             }
         };
-        let voxel_pipeline = match pipeline_server.get_pipeline("voxel").map(AsRef::as_ref) {
+        let voxel_pipeline = match pipeline_server.get_pipeline("voxel") {
             Some(Pipeline::Voxel(voxel)) => voxel,
             _ => {
                 log::error!("Failed to get Voxel pipeline");

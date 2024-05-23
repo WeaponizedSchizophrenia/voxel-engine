@@ -93,6 +93,7 @@ fn mouse_motion_listener_system(
     }
 }
 
+/// Listens for window events and updates the camera controller accordingly.
 fn window_event_listener_system(
     mut events: EventReader<ecs::events::window_events::WindowEvent>,
     mut camera_controllers: Query<(&mut CameraController, Option<&CurrentCameraController>)>,
