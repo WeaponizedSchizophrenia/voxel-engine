@@ -111,47 +111,6 @@ pub fn render_system(
         }
     }
 
-    // let albedo_buffer = context.device.create_buffer(&BufferDescriptor {
-    //     label: None,
-    //     size: 4 * 1280 * 720,
-    //     usage: BufferUsages::MAP_READ | BufferUsages::COPY_DST,
-    //     mapped_at_creation: true,
-    // });
-    // command_encoder.copy_texture_to_buffer(
-    //     ImageCopyTexture {
-    //         texture: &gbuffer.albedo_texture.texture,
-    //         mip_level: 0,
-    //         origin: Origin3d::ZERO,
-    //         aspect: wgpu::TextureAspect::All,
-    //     },
-    //     ImageCopyBuffer {
-    //         buffer: &albedo_buffer,
-    //         layout: ImageDataLayout {
-    //             offset: 0,
-    //             bytes_per_row: Some(4 * 1280),
-    //             rows_per_image: Some(720),
-    //         },
-    //     },
-    //     Extent3d {
-    //         width: 1280,
-    //         height: 720,
-    //         depth_or_array_layers: 1,
-    //     },
-    // );
-
-    // let data = albedo_buffer.slice(..).get_mapped_range().to_vec();
-    // if let Err(e) = image::write_buffer_with_format(
-    //     &mut BufWriter::new(File::create("./assets/test.png").unwrap()),
-    //     &data,
-    //     1280,
-    //     720,
-    //     image::ColorType::Rgba8,
-    //     image::ImageFormat::Png,
-    // ) {
-    //     log::error!("Failed to write image: {e}");
-    // }
-    // drop(albedo_buffer);
-
     // Lighting pass
     {
         let mut render_pass = command_encoder.begin_render_pass(&RenderPassDescriptor {
