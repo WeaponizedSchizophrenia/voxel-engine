@@ -1,8 +1,8 @@
 (
     seed: 420,
-    frequency: 0.05,
-    noise_type: Perlin,
-    fractal_type: FBm,
-    rotation_type: None,
-    voxel_threshold: -0.25,
+    frequency: 0.02,
+    noise_type: ValueCubic,
+    fractal_type: None,
+    rotation_type: ImproveXYPlanes,
+    voxel_threshold: -0.16,
 )

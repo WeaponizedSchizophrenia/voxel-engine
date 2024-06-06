@@ -4,5 +4,5 @@
     noise_type: Perlin,
     fractal_type: None,
     height_mult: 7.6,
-    base_height: -1.0,
+    base_height: 281.0,
 )
