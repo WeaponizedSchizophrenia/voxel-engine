@@ -84,6 +84,12 @@ impl TextureArray {
     pub fn len(&self) -> u32 {
         self.views.len() as u32
     }
+
+    /// Checks if the texture array is empty.
+    #[allow(unused)]
+    pub fn is_empty(&self) -> bool {
+        self.views.is_empty()
+    }
 }
 
 /// Describes the creation of `TextureArray`.

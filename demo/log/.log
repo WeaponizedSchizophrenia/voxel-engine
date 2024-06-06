@@ -1,0 +1,4 @@
+[2024-06-06 21:28:11] INFO  engine/src/ecs/packages/voxel_registry/mod.rs:54 Loading 3 voxels.
+[2024-06-06 21:28:11] INFO  engine/src/ecs/packages/window_surface/mod.rs:100 Window and surface created
+[2024-06-06 21:28:23] INFO  engine/src/ecs/packages/generator/mod.rs:154 Chunk generation took 11394 ms
+[2024-06-06 21:28:29] INFO  engine/src/ecs/packages/chunk/mod.rs:63 Chunk meshing took 5916 ms

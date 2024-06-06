@@ -406,22 +406,22 @@ impl WinitPlatform {
         //         window_id,
         //         ref event,
         //     } if window_id == window.id() => {
-                self.handle_window_event(io, window, event);
-            // }
-            // Track key release events outside our window. If we don't do this,
-            // we might never see the release event if some other window gets focus.
-            // Event::DeviceEvent {
-            //     event:
-            //         DeviceEvent::Key(RawKeyEvent {
-            //             physical_key,
-            //             state: ElementState::Released,
-            //         }),
-            //     ..
-            // } => {
-            //     if let Some(key) = to_imgui_key(key) {
-            //         io.add_key_event(key, false);
-            //     }
-            // }
+        self.handle_window_event(io, window, event);
+        // }
+        // Track key release events outside our window. If we don't do this,
+        // we might never see the release event if some other window gets focus.
+        // Event::DeviceEvent {
+        //     event:
+        //         DeviceEvent::Key(RawKeyEvent {
+        //             physical_key,
+        //             state: ElementState::Released,
+        //         }),
+        //     ..
+        // } => {
+        //     if let Some(key) = to_imgui_key(key) {
+        //         io.add_key_event(key, false);
+        //     }
+        // }
         //     _ => (),
         // }
     }

@@ -454,7 +454,7 @@ impl Renderer {
                 compilation_options: PipelineCompilationOptions {
                     constants: &constants,
                     zero_initialize_workgroup_memory: false,
-                }
+                },
             },
             primitive: PrimitiveState {
                 topology: PrimitiveTopology::TriangleList,
@@ -498,7 +498,7 @@ impl Renderer {
                 compilation_options: PipelineCompilationOptions {
                     constants: &constants,
                     zero_initialize_workgroup_memory: false,
-                }
+                },
             }),
             multiview: None,
         });

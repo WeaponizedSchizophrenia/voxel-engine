@@ -8,6 +8,7 @@ pub mod game_world;
 pub mod gbuffer;
 pub mod generator;
 pub mod input_provider;
+pub mod logging_init;
 pub mod pipeline_server;
 pub mod render_init;
 pub mod time;

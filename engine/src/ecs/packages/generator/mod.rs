@@ -122,10 +122,10 @@ pub fn generate_chunk_data_3d(
                         (0..chunk::CHUNK_LENGTHI32).map(move |z| {
                             let world_pos = get_world_pos(&index, x, y, z);
                             let height = height_map[(x + z * chunk::CHUNK_LENGTHI32) as usize];
-                            let is_cave_voxel = generator.does_underground_contains_voxel(world_pos);
+                            let is_cave_voxel =
+                                generator.does_underground_contains_voxel(world_pos);
 
-                            if height >= world_pos.y && is_cave_voxel
-                            {
+                            if height >= world_pos.y && is_cave_voxel {
                                 let delta = height - world_pos.y;
                                 let grass_threshold = if delta >= generation_options.stone_threshold
                                 {
