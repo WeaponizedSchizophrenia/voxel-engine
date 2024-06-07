@@ -1,13 +1,5 @@
 use std::time::Instant;
 
-use crate::{
-    common::{chunk, VoxelHandle},
-    ecs::{components::Chunk, schedules::Update},
-    utils::file_system,
-};
-
-use super::Package;
-
 mod cave_options;
 mod common;
 mod generation_options;
@@ -22,12 +14,13 @@ use bevy_ecs::{
 use nalgebra::{vector, Vector3};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 pub use resource::Generator;
+use voxel_engine::{application::Application, common::{chunk, VoxelHandle}, ecs::{components::Chunk, packages::Package, schedules::Update}, utils::file_system};
 
 /// Package for `Generator`.
 pub struct GeneratorPackage;
 
 impl Package for GeneratorPackage {
-    fn initialize(&mut self, app: &mut crate::application::Application) {
+    fn initialize(&mut self, app: &mut Application) {
         let generation_options =
             match file_system::read_asset_config("generation", "generation_options") {
                 Ok(options) => options,

@@ -6,7 +6,7 @@ pub mod config;
 pub mod debug_gui;
 pub mod game_world;
 pub mod gbuffer;
-pub mod generator;
+// pub mod generator;
 pub mod input_provider;
 pub mod logging_init;
 pub mod pipeline_server;

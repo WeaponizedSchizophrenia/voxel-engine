@@ -1,6 +1,6 @@
 # Packages to move to demo project:
 * ~~Camera controller~~
-* Chunk generation
+* ~~Chunk generation~~
 * Config
 * Game world
 * Generator

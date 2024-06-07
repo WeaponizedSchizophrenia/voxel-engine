@@ -3,7 +3,7 @@ use std::time::Instant;
 use bevy_ecs::{
     entity::Entity,
     query::Changed,
-    schedule::IntoSystemConfigs as _,
+    // schedule::IntoSystemConfigs as _,
     system::{ParallelCommands, Query, Res},
 };
 use nalgebra::Vector3;
@@ -13,7 +13,7 @@ use crate::ecs::{
     schedules::Update,
 };
 
-use super::{generator, render_init::RenderContext, voxel_registry::VoxelRegistry, Package};
+use super::{render_init::RenderContext, voxel_registry::VoxelRegistry, Package};
 
 /// Package for initializing chunks.
 pub struct ChunkPackage;
@@ -30,7 +30,7 @@ impl Package for ChunkPackage {
 
         app.add_systems(
             Update,
-            chunk_mesher_system.after(generator::generate_chunk_data_3d),
+            chunk_mesher_system,
         );
     }
 }
