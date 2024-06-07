@@ -11,7 +11,7 @@ use voxel_engine::{
 
 fn main() -> anyhow::Result<()> {
     Application::new()?
-        .with_package(LoggingInitPackage::with_custom_config("./config/log.yaml"))
+        .with_package(LoggingInitPackage::with_custom_config("./config/log.yml"))
         .with_package(ConfigPackage)
         .with_package(PipelineServerPackage)
         .with_package(GBufferPackage)
