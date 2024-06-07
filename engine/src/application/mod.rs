@@ -31,6 +31,8 @@ use crate::{
     utils::bevy::{ScheduleExtensions as _, WorldExtensions},
 };
 
+mod runner;
+
 /// The main application object.
 pub struct Application {
     world: World,
@@ -172,6 +174,11 @@ impl Application {
 
         self.world.run_schedule(EarlyUpdate);
         self.world.run_schedule(Update);
+    }
+
+    /// Runs this application.
+    pub fn run(self) -> anyhow::Result<()> {
+        runner::run_app(self)
     }
 }
 

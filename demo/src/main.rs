@@ -7,14 +7,10 @@ use voxel_engine::{
         logging_init::LoggingInitPackage, pipeline_server::PipelineServerPackage,
         voxel_registry::VoxelRegistryPackage,
     },
-    ControlFlow, EventLoop,
 };
 
 fn main() -> anyhow::Result<()> {
-    let event_loop = EventLoop::new()?;
-    event_loop.set_control_flow(ControlFlow::Poll);
-
-    let mut app = Application::new()?
+    Application::new()?
         .with_package(LoggingInitPackage::with_custom_config("./config/log.yaml"))
         .with_package(ConfigPackage)
         .with_package(PipelineServerPackage)
@@ -25,9 +21,6 @@ fn main() -> anyhow::Result<()> {
         .with_package(VoxelRegistryPackage)
         .with_package(GameWorldPackage)
         .with_package(ChunkPackage)
-        .with_package(DebugCompositorPackage);
-
-    event_loop.run_app(&mut app)?;
-
-    Ok(())
+        .with_package(DebugCompositorPackage)
+        .run()
 }
