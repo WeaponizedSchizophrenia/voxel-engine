@@ -5,6 +5,7 @@ use bevy_ecs::{
 };
 pub use resource::InputProvider;
 use winit::{event::ElementState, keyboard::PhysicalKey};
+pub use winit::{event::MouseButton, keyboard::KeyCode};
 
 use crate::ecs::{
     events::window_events::{KeyboardInput, MouseButtonInput, MouseMotion, MouseMoved},

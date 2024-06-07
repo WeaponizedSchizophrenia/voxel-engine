@@ -1,5 +1,6 @@
 use bevy_ecs::{event::Event, world::World};
 use nalgebra::{vector, Vector2};
+pub use winit::event::{MouseScrollDelta, WindowEvent as WinitWindowEvent};
 use winit::{
     dpi::{PhysicalPosition, PhysicalSize},
     event::{ElementState, KeyEvent, MouseButton},
@@ -10,7 +11,7 @@ use crate::utils::bevy::WorldExtensions;
 
 /// `winit::event::WindowEvent` wrapper for the bevy ecs.
 #[derive(Event, Clone, PartialEq, Debug)]
-pub struct WindowEvent(pub winit::event::WindowEvent);
+pub struct WindowEvent(pub WinitWindowEvent);
 
 /// Window resized event, contains the new width and height.
 #[derive(Event, Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -89,7 +90,7 @@ pub struct MouseButtonInput {
 }
 
 /// Registers all the window events to the provided `World`.
-pub fn register_window_events(world: &mut World) {
+pub(crate) fn register_window_events(world: &mut World) {
     world.add_event::<WindowEvent>();
     world.add_event::<WindowResized>();
     world.add_event::<WindowRenderRequested>();

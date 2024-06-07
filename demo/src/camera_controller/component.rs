@@ -1,7 +1,6 @@
 use bevy_ecs::component::Component;
 use nalgebra::{vector, Matrix4, Perspective3, Point3, Unit, Vector3};
-
-use crate::ecs::resources::camera::CameraUniform;
+use voxel_engine::ecs::resources::camera::CameraUniform;
 
 /// A tag for the current camera controller.
 #[derive(Component)]

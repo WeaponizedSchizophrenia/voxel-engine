@@ -4,29 +4,24 @@ use bevy_ecs::{
     schedule::IntoSystemConfigs as _,
     system::{Query, Res},
 };
+use component::{CameraController, CurrentCameraController};
 use nalgebra::{point, vector, Matrix3, Vector3};
-use winit::{
-    event::{MouseButton, WindowEvent},
-    keyboard::KeyCode,
-};
-
-use crate::ecs::{
-    self,
-    events::window_events::MouseMotion,
-    resources::Camera,
-    schedules::{Render, SentWindowEvent},
-    systems,
-};
-
-pub use self::component::{CameraController, CurrentCameraController};
-
-use super::{
-    config::Config,
-    input_provider::{self, InputProvider},
-    render_init::RenderContext,
-    time::Time,
-    window_surface::Window,
-    Package,
+use voxel_engine::{
+    application::Application,
+    ecs::{
+        events::window_events::{MouseMotion, MouseScrollDelta, WindowEvent, WinitWindowEvent},
+        packages::{
+            config::Config,
+            input_provider::{self, InputProvider, KeyCode, MouseButton},
+            render_init::RenderContext,
+            time::Time,
+            window_surface::Window,
+            InitializationStage, Package,
+        },
+        resources::Camera,
+        schedules::{Render, SentWindowEvent},
+        systems,
+    },
 };
 
 mod component;
@@ -35,7 +30,7 @@ mod component;
 pub struct CameraControllerPackage;
 
 impl Package for CameraControllerPackage {
-    fn initialize(&mut self, app: &mut crate::application::Application) {
+    fn initialize(&mut self, app: &mut Application) {
         let window = match app.get_resource::<Window>() {
             Some(win) => win,
             None => {
@@ -65,10 +60,10 @@ impl Package for CameraControllerPackage {
         );
     }
 
-    fn intialization_stage(&self) -> super::InitializationStage {
+    fn intialization_stage(&self) -> InitializationStage {
         // The camera controller needs to be initialized after the window because the projection
         // matrix needs the aspect ratio of the window.
-        super::InitializationStage::WindowInit
+        InitializationStage::WindowInit
     }
 }
 
@@ -95,27 +90,27 @@ fn mouse_motion_listener_system(
 
 /// Listens for window events and updates the camera controller accordingly.
 fn window_event_listener_system(
-    mut events: EventReader<ecs::events::window_events::WindowEvent>,
+    mut events: EventReader<WindowEvent>,
     mut camera_controllers: Query<(&mut CameraController, Option<&CurrentCameraController>)>,
     config: Res<Config>,
 ) {
     for event in events.read() {
         match event.0 {
-            WindowEvent::MouseWheel { delta, .. } => {
+            WinitWindowEvent::MouseWheel { delta, .. } => {
                 if let Some((mut controller, _)) =
                     camera_controllers.iter_mut().find(|(_, c)| c.is_some())
                 {
                     match delta {
-                        winit::event::MouseScrollDelta::LineDelta(_, y) => {
+                        MouseScrollDelta::LineDelta(_, y) => {
                             controller.speed += y * config.camera_speed_change_step;
                         }
-                        winit::event::MouseScrollDelta::PixelDelta(d) => {
+                        MouseScrollDelta::PixelDelta(d) => {
                             controller.speed += d.y as f32 * config.camera_speed_change_step;
                         }
                     }
                 }
             }
-            WindowEvent::Resized(new_size) => {
+            WinitWindowEvent::Resized(new_size) => {
                 for (mut controller, _) in camera_controllers.iter_mut() {
                     controller.aspect_ratio = new_size.width as f32 / new_size.height as f32;
                 }

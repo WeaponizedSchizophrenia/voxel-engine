@@ -1,5 +1,5 @@
 # Packages to move to demo project:
-* Camera controller
+* ~~Camera controller~~
 * Chunk generation
 * Config
 * Game world
