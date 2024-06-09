@@ -20,9 +20,9 @@ pub struct ChunkPackage;
 
 impl Package for ChunkPackage {
     fn initialize(&mut self, app: &mut crate::application::Application) {
-        for x in 0..5 {
-            for y in 0..5 {
-                for z in 0..5 {
+        for x in 0..2 {
+            for y in 0..2 {
+                for z in 0..2 {
                     app.spawn(Chunk::new(Vector3::new(x, y, z)));
                 }
             }

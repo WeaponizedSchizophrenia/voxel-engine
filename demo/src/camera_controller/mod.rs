@@ -11,7 +11,6 @@ use voxel_engine::{
     ecs::{
         events::window_events::{MouseMotion, MouseScrollDelta, WindowEvent, WinitWindowEvent},
         packages::{
-            config::Config,
             input_provider::{self, InputProvider, KeyCode, MouseButton},
             render_init::RenderContext,
             time::Time,
@@ -23,6 +22,8 @@ use voxel_engine::{
         systems,
     },
 };
+
+use crate::config::Config;
 
 mod component;
 

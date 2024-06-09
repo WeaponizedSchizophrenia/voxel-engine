@@ -727,6 +727,7 @@ dependencies = [
  "rayon",
  "ron",
  "serde",
+ "serde_yml",
  "voxel-engine",
 ]
 
@@ -2542,7 +2543,6 @@ dependencies = [
  "rayon",
  "ron",
  "serde",
- "serde_yml",
  "thiserror",
  "wgpu",
  "winit",

@@ -4,25 +4,13 @@ use bevy_ecs::{
     system::{NonSend, Res, ResMut, Resource},
 };
 pub use resource::Config;
-
-use crate::{
-    ecs::{
-        schedules::{Exit, Render},
-        systems,
-    },
-    utils::file_system,
-};
-
-use super::{
-    debug_gui::{self, DebugCompositor},
-    Package,
-};
+use voxel_engine::{application::Application, ecs::{packages::{debug_gui::{self, DebugCompositor}, Package}, schedules::{Exit, Render}, systems}, utils::file_system};
 
 /// Package for `Config`.
 pub struct ConfigPackage;
 
 impl Package for ConfigPackage {
-    fn initialize(&mut self, app: &mut crate::application::Application) {
+    fn initialize(&mut self, app: &mut Application) {
         let config = file_system::read_config()
             .map(|cfg| {
                 serde_yml::from_str::<Config>(&cfg)

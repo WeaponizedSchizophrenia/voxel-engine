@@ -1,7 +1,7 @@
 # Packages to move to demo project:
 * ~~Camera controller~~
 * ~~Chunk generation~~
-* Config
+* ~~Config~~
 * Game world
 * Generator
 * Voxel registry (maybe make it generic)

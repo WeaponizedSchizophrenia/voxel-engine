@@ -2,7 +2,7 @@ use crate::application::Application;
 
 // pub mod camera_controller;
 pub mod chunk;
-pub mod config;
+// pub mod config;
 pub mod debug_gui;
 pub mod game_world;
 pub mod gbuffer;

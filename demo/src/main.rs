@@ -1,9 +1,11 @@
 use camera_controller::CameraControllerPackage;
+use config::ConfigPackage;
 use generator::GeneratorPackage;
 use voxel_engine::application::Application;
 
 mod camera_controller;
 mod generator;
+mod config;
 
 fn main() -> anyhow::Result<()> {
     Application::new()?
@@ -12,7 +14,7 @@ fn main() -> anyhow::Result<()> {
                 "./config/log.yml",
             ),
         )
-        .with_package(voxel_engine::ecs::packages::config::ConfigPackage)
+        .with_package(ConfigPackage)
         .with_package(voxel_engine::ecs::packages::pipeline_server::PipelineServerPackage)
         .with_package(voxel_engine::ecs::packages::gbuffer::GBufferPackage)
         .with_package(voxel_engine::ecs::packages::input_provider::InputProviderPackage)
